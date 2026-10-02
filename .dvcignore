@@ -1,0 +1,3 @@
+# Patterns ignorés par DVC
+__pycache__
+*.pyc

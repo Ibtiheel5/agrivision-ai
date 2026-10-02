@@ -1,0 +1,17 @@
+stages:
+  prepare:
+    cmd: python -m src.data.dataset
+    deps: [src/data/dataset.py, data/raw]
+    params: [seed, data]
+    outs: [data/processed]
+  train:
+    cmd: python -m src.models.train
+    deps: [src/models/train.py, data/processed]
+    params: [train, seed]
+    outs: [models/best.pt]
+  evaluate:
+    cmd: python -m src.models.evaluate
+    deps: [src/models/evaluate.py, models/best.pt, data/processed]
+    params: [export, gate]
+    outs: [models/best.onnx, models/best_int8.onnx]
+    metrics: [models/metrics.json]

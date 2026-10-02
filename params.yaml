@@ -1,0 +1,19 @@
+seed: 42
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  split: {train: 0.7, val: 0.15, test: 0.15}
+  # classes au format culture_maladie, à compléter selon le dataset retenu
+  classes: [tomate_mildiou, tomate_saine, pomme_de_terre_mildiou, pomme_de_terre_saine, mais_rouille, mais_saine]
+train:
+  model: yolov8n.pt
+  imgsz: 640
+  epochs: 50
+  batch: 16
+  experiment: agrivision
+export:
+  onnx_path: models/best.onnx
+  int8_path: models/best_int8.onnx
+gate:
+  min_map50: 0.50
+  max_latency_ms: 150

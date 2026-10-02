@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+frontend/dist/
+.env
+mlruns/
+mlflow/
+/data/raw
+/data/processed
+/models/*
+!/models/.gitkeep
+*.onnx
+*.pt

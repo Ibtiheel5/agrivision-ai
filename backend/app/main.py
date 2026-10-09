@@ -35,6 +35,8 @@ from .schemas import (
     Timings,
 )
 
+from .metrics import PREDICTIONS, setup_metrics
+
 log = logging.getLogger("agrivision")
 
 
@@ -108,6 +110,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"]
 )
+
+setup_metrics(app)
 
 
 def _model_version(request: Request) -> str:
@@ -287,6 +291,7 @@ def predict_top3(
     preds, timings = det.predict_top3(
         img, conf_min=conf_min, iou=iou, accept=accept, margin_min=margin_min
     )
+    PREDICTIONS.labels(overall_status(preds)).inc()
     detections = []
     for p in preds:
         cid, label, score = p.candidates[0]

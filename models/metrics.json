@@ -1,0 +1,81 @@
+{
+  "comparaison_val": [
+    {
+      "run": "A_plantdoc",
+      "mAP50": 0.5705515503150269,
+      "mAP50_95": 0.39620501270409325,
+      "precision": 0.5254208733306257,
+      "rappel": 0.5771946864143986
+    },
+    {
+      "run": "B_plantdoc_plantseg",
+      "mAP50": 0.6159857777140858,
+      "mAP50_95": 0.4217049677098589,
+      "precision": 0.6163028018402189,
+      "rappel": 0.5912301307493755
+    },
+    {
+      "run": "B2_mapping_corrige",
+      "mAP50": 0.6406576350410919,
+      "mAP50_95": 0.4421218188053109,
+      "precision": 0.6164570166300836,
+      "rappel": 0.6328778929260795
+    }
+  ],
+  "sain_ou_malade": {
+    "best": "B2_mapping_corrige",
+    "malades_predites_malades": 0.6537162162162162,
+    "malades_predites_SAINES": 0.03885135135135135,
+    "malades_non_detectees": 0.30743243243243246,
+    "saines_predites_saines": 0.7804511278195488,
+    "saines_predites_malades": 0.021052631578947368
+  },
+  "test": {
+    "run": "B2_mapping_corrige",
+    "test_mAP50": 0.6477439771704161,
+    "test_mAP50_95": 0.4935329697524394,
+    "test_precision": 0.6699059489188732,
+    "test_rappel": 0.5843327902606409
+  },
+  "onnx": {
+    "path": "/kaggle/working/ckpt/runs/B2_mapping_corrige/weights/best.onnx",
+    "parite": "30 / 30",
+    "p50_ms": 140.04131700005473,
+    "p95_ms": 162.7613001500549,
+    "taille_mo": 38.0
+  },
+  "calibration_top3": {
+    "accept": 0.4,
+    "margin": 0.0,
+    "couverture": 0.79,
+    "precision_top1": 0.88,
+    "cible": 0.9
+  },
+  "plantseg_ajoute": {
+    "grape leaf black rot": 150,
+    "Corn Gray leaf spot": 150,
+    "Potato leaf early blight": 119,
+    "Potato leaf late blight": 111,
+    "Squash Powdery mildew leaf": 150,
+    "Tomato leaf bacterial spot": 108,
+    "Tomato Early blight leaf": 150,
+    "Tomato leaf late blight": 150,
+    "Tomato leaf mosaic virus": 62,
+    "Tomato Septoria leaf spot": 118
+  },
+  "params": {
+    "SEED": 42,
+    "WEIGHTS": "yolo11s.pt",
+    "IMGSZ": 640,
+    "BATCH": 32,
+    "EP": 40,
+    "PATIENCE": 10,
+    "CLOSE_MOSAIC": 5,
+    "TIME_H": 0.8,
+    "EP_C1": 20,
+    "EP_C2": 25,
+    "MAX_PS_PER_CLASS": 150,
+    "PAD": 0.1,
+    "RUN_C": false
+  }
+}

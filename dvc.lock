@@ -1,0 +1,30 @@
+schema: '2.0'
+stages:
+  gate:
+    cmd: python scripts/check_gate.py
+    deps:
+    - path: models/benchmark_local.json
+      hash: md5
+      md5: 451f9ba2fb069a4528dabdbb3442297e
+      size: 284
+    - path: models/best.onnx
+      hash: md5
+      md5: 20c95fba8c70d9a276961db350ae0d1e
+      size: 37972321
+    - path: models/inference_config.json
+      hash: md5
+      md5: cf47cc589f4e07ed5743b402e30d5e23
+      size: 914
+    - path: models/metrics.json
+      hash: md5
+      md5: 01cb42dcaf1f65f4d830ddcb3cb005e8
+      size: 2142
+    - path: scripts/check_gate.py
+      hash: md5
+      md5: 70661a0ec2e8822e804a7a152ff9a7fa
+      size: 1986
+    params:
+      params.yaml:
+        gate:
+          min_map50: 0.5
+          max_latency_ms: 500

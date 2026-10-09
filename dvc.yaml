@@ -1,17 +1,15 @@
+# L'entraînement se fait dans le notebook Kaggle (notebooks/agrivision_complet_v2.ipynb) :
+# les poids et métriques arrivent dans models/ et sont suivis par DVC (models/*.dvc).
+# Cette étape applique la porte d'évaluation sur le modèle présent.
+# Avant : python scripts/benchmark_latency.py  (écrit models/benchmark_local.json)
 stages:
-  prepare:
-    cmd: python -m src.data.dataset
-    deps: [src/data/dataset.py, data/raw]
-    params: [seed, data]
-    outs: [data/processed]
-  train:
-    cmd: python -m src.models.train
-    deps: [src/models/train.py, data/processed]
-    params: [train, seed]
-    outs: [models/best.pt]
-  evaluate:
-    cmd: python -m src.models.evaluate
-    deps: [src/models/evaluate.py, models/best.pt, data/processed]
-    params: [export, gate]
-    outs: [models/best.onnx, models/best_int8.onnx]
-    metrics: [models/metrics.json]
+  gate:
+    cmd: python scripts/check_gate.py
+    deps:
+      - models/best.onnx
+      - models/metrics.json
+      - models/inference_config.json
+      - models/benchmark_local.json
+      - scripts/check_gate.py
+    params:
+      - gate

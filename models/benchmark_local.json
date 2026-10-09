@@ -1,0 +1,13 @@
+{
+  "machine": "Intel64 Family 6 Model 142 Stepping 9, GenuineIntel",
+  "cpu_count": 4,
+  "onnxruntime": "1.20.1",
+  "providers": [
+    "CPUExecutionProvider"
+  ],
+  "n": 100,
+  "p50_ms": 341.0,
+  "p95_ms": 412.3,
+  "inference_p50_ms": 325.6,
+  "inference_p95_ms": 393.5
+}

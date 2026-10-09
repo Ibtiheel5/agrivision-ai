@@ -1,28 +1,47 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from "react";
+import { classColor } from "../lib/colors";
+import { describe } from "../lib/labels";
 
-const COLORS = ['#2b6a4d', '#c0392b', '#2980b9', '#8e44ad', '#d35400', '#16a085']
+/**
+ * Calque transparent dessiné par-dessus une <img> ou une <video>.
+ * `width`/`height` = dimensions de l'image analysée (les boîtes sont dans ce repère) ;
+ * le canvas est étiré en CSS sur le média, donc les boîtes restent alignées à toute taille d'écran.
+ */
+export default function BoundingBoxCanvas({ width, height, detections, showLabels = true }) {
+  const ref = useRef(null);
 
-export default function BoundingBoxCanvas({ src, detections }) {
-  const ref = useRef(null)
   useEffect(() => {
-    const img = new Image()
-    img.onload = () => {
-      const c = ref.current
-      c.width = img.width
-      c.height = img.height
-      const ctx = c.getContext('2d')
-      ctx.drawImage(img, 0, 0)
-      const labels = [...new Set(detections.map((d) => d.label))]
-      detections.forEach((d) => {
-        const [x1, y1, x2, y2] = d.box
-        ctx.strokeStyle = COLORS[labels.indexOf(d.label) % COLORS.length]
-        ctx.lineWidth = 3
-        ctx.strokeRect(x1, y1, x2 - x1, y2 - y1)
-        ctx.fillStyle = ctx.strokeStyle
-        ctx.fillText(`${d.label} ${(d.confidence * 100).toFixed(0)}%`, x1 + 3, y1 + 12)
-      })
+    const canvas = ref.current;
+    if (!canvas || !width || !height) return;
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, width, height);
+
+    const base = Math.min(width, height);
+    const lineWidth = Math.max(2, Math.round(base / 200));
+    const fontSize = Math.max(12, Math.round(base / 28));
+    ctx.lineWidth = lineWidth;
+    ctx.font = `600 ${fontSize}px system-ui, sans-serif`;
+    ctx.textBaseline = "top";
+
+    for (const d of detections) {
+      const { x1, y1, x2, y2 } = d.box;
+      const color = classColor(d.class_id);
+      ctx.strokeStyle = color;
+      ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+      if (!showLabels) continue;
+
+      const text = `${describe(d.label).short} ${(d.confidence * 100).toFixed(0)}%`;
+      const boxW = ctx.measureText(text).width + 10;
+      const boxH = fontSize + 8;
+      const ty = y1 - boxH >= 0 ? y1 - boxH : y1; // étiquette au-dessus, ou à l'intérieur si la boîte touche le bord
+      ctx.fillStyle = color;
+      ctx.fillRect(x1, ty, boxW, boxH);
+      ctx.fillStyle = "#fff";
+      ctx.fillText(text, x1 + 5, ty + 4);
     }
-    img.src = src
-  }, [src, detections])
-  return <canvas ref={ref} style={{ maxWidth: '100%' }} />
+  }, [width, height, detections, showLabels]);
+
+  return <canvas ref={ref} className="pointer-events-none absolute inset-0 h-full w-full" />;
 }

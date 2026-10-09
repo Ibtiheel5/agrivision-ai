@@ -12,3 +12,10 @@ mlflow/
 !/models/.gitkeep
 *.onnx
 *.pt
+!/models/*.dvc
+!/models/.gitignore
+!/models/classes.txt
+!/models/inference_config.json
+!/models/metrics.json!/models/*.dvc
+!/models/metrics.json
+!/models/benchmark_local.json

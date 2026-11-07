@@ -1,4 +1,5 @@
 """Météo + alertes réelles (Open-Meteo, gratuit non commercial, sans clé)."""
+
 import time
 from typing import Optional
 
@@ -43,11 +44,17 @@ def compute_alert(rain7: float, et07: float, tmaxs: list) -> dict:
     ratio = rain7 / et07 if et07 > 0 else 1.0
     if ratio < 0.2:
         level, title = "alerte", "Alerte déficit hydrique"
-        msg = (f"Seulement {rain7:.0f} mm de pluie prévus sur 7 jours pour {et07:.0f} mm "
-               "d'évapotranspiration de référence (ET0). Surveillez l'irrigation, arrosez tôt le matin ou le soir.")
+        msg = (
+            f"Seulement {rain7:.0f} mm de pluie prévus sur 7 jours pour {et07:.0f} mm "
+            "d'évapotranspiration de référence (ET0). Surveillez l'irrigation, "
+            "arrosez tôt le matin ou le soir."
+        )
     elif ratio < 0.5:
         level, title = "vigilance", "Vigilance déficit hydrique"
-        msg = f"Pluie prévue ({rain7:.0f} mm) inférieure à la moitié de l'ET0 ({et07:.0f} mm) sur 7 jours."
+        msg = (
+            f"Pluie prévue ({rain7:.0f} mm) inférieure à la moitié de l'ET0 "
+            f"({et07:.0f} mm) sur 7 jours."
+        )
     else:
         level, title, msg = "aucune", "Pas d'alerte", "Bilan pluie / ET0 correct sur 7 jours."
     if hot >= 2:
@@ -63,7 +70,9 @@ def places():
 
 
 @router.get("")
-async def weather(place: Optional[str] = None, lat: Optional[float] = None, lon: Optional[float] = None):
+async def weather(
+    place: Optional[str] = None, lat: Optional[float] = None, lon: Optional[float] = None
+):
     if place:
         if place not in GOVERNORATES:
             raise HTTPException(404, "Gouvernorat inconnu")
@@ -76,9 +85,15 @@ async def weather(place: Optional[str] = None, lat: Optional[float] = None, lon:
         return hit[1]
 
     params = {
-        "latitude": lat, "longitude": lon, "timezone": "Africa/Tunis", "forecast_days": 7,
+        "latitude": lat,
+        "longitude": lon,
+        "timezone": "Africa/Tunis",
+        "forecast_days": 7,
         "current": "temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weather_code",
-        "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,et0_fao_evapotranspiration",
+        "daily": (
+            "weather_code,temperature_2m_max,temperature_2m_min,"
+            "precipitation_sum,et0_fao_evapotranspiration"
+        ),
     }
     try:
         async with httpx.AsyncClient(timeout=15) as c:
@@ -89,18 +104,30 @@ async def weather(place: Optional[str] = None, lat: Optional[float] = None, lon:
         raise HTTPException(502, f"Open-Meteo indisponible : {e}")
 
     cur, day = d["current"], d["daily"]
-    days = [{
-        "date": day["time"][i], "tmax": day["temperature_2m_max"][i], "tmin": day["temperature_2m_min"][i],
-        "rain_mm": day["precipitation_sum"][i] or 0.0, "et0_mm": day["et0_fao_evapotranspiration"][i] or 0.0,
-        "label": describe(day["weather_code"][i]),
-    } for i in range(len(day["time"]))]
+    days = [
+        {
+            "date": day["time"][i],
+            "tmax": day["temperature_2m_max"][i],
+            "tmin": day["temperature_2m_min"][i],
+            "rain_mm": day["precipitation_sum"][i] or 0.0,
+            "et0_mm": day["et0_fao_evapotranspiration"][i] or 0.0,
+            "label": describe(day["weather_code"][i]),
+        }
+        for i in range(len(day["time"]))
+    ]
     rain7 = sum(x["rain_mm"] for x in days)
     et07 = sum(x["et0_mm"] for x in days)
     out = {
-        "place": place, "lat": lat, "lon": lon,
-        "current": {"temp": cur["temperature_2m"], "humidity": cur["relative_humidity_2m"],
-                    "wind_kmh": cur["wind_speed_10m"], "rain_mm": cur["precipitation"],
-                    "label": describe(cur["weather_code"])},
+        "place": place,
+        "lat": lat,
+        "lon": lon,
+        "current": {
+            "temp": cur["temperature_2m"],
+            "humidity": cur["relative_humidity_2m"],
+            "wind_kmh": cur["wind_speed_10m"],
+            "rain_mm": cur["precipitation"],
+            "label": describe(cur["weather_code"]),
+        },
         "days": days,
         "summary": {"rain_next7_mm": round(rain7, 1), "et0_next7_mm": round(et07, 1)},
         "alert": compute_alert(rain7, et07, [x["tmax"] for x in days]),

@@ -9,6 +9,7 @@ Dépendance : pip install httpx
 Dans main.py : from app.routers.risk_map import router as risk_router, init_db
                app.include_router(risk_router); init_db()
 """
+
 import sqlite3
 import time
 from pathlib import Path
@@ -25,18 +26,30 @@ CACHE_TTL = 3 * 3600  # 3 h : on ménage l'API gratuite (usage non commercial)
 
 # Centres approximatifs (chef-lieu) des 24 gouvernorats
 GOVERNORATES = {
-    "Tunis": (36.8065, 10.1815), "Ariana": (36.8665, 10.1647),
-    "Ben Arous": (36.7531, 10.2189), "Manouba": (36.8101, 10.0863),
-    "Nabeul": (36.4513, 10.7357), "Zaghouan": (36.4029, 10.1429),
-    "Bizerte": (37.2744, 9.8739), "Béja": (36.7256, 9.1817),
-    "Jendouba": (36.5011, 8.7802), "Le Kef": (36.1675, 8.7049),
-    "Siliana": (36.0849, 9.3708), "Sousse": (35.8256, 10.6369),
-    "Monastir": (35.7643, 10.8113), "Mahdia": (35.5047, 11.0622),
-    "Sfax": (34.7406, 10.7603), "Kairouan": (35.6781, 10.0963),
-    "Kasserine": (35.1676, 8.8365), "Sidi Bouzid": (35.0382, 9.4849),
-    "Gabès": (33.8815, 10.0982), "Médenine": (33.3549, 10.5055),
-    "Tataouine": (32.9297, 10.4518), "Gafsa": (34.4250, 8.7842),
-    "Tozeur": (33.9197, 8.1335), "Kébili": (33.7044, 8.9690),
+    "Tunis": (36.8065, 10.1815),
+    "Ariana": (36.8665, 10.1647),
+    "Ben Arous": (36.7531, 10.2189),
+    "Manouba": (36.8101, 10.0863),
+    "Nabeul": (36.4513, 10.7357),
+    "Zaghouan": (36.4029, 10.1429),
+    "Bizerte": (37.2744, 9.8739),
+    "Béja": (36.7256, 9.1817),
+    "Jendouba": (36.5011, 8.7802),
+    "Le Kef": (36.1675, 8.7049),
+    "Siliana": (36.0849, 9.3708),
+    "Sousse": (35.8256, 10.6369),
+    "Monastir": (35.7643, 10.8113),
+    "Mahdia": (35.5047, 11.0622),
+    "Sfax": (34.7406, 10.7603),
+    "Kairouan": (35.6781, 10.0963),
+    "Kasserine": (35.1676, 8.8365),
+    "Sidi Bouzid": (35.0382, 9.4849),
+    "Gabès": (33.8815, 10.0982),
+    "Médenine": (33.3549, 10.5055),
+    "Tataouine": (32.9297, 10.4518),
+    "Gafsa": (34.4250, 8.7842),
+    "Tozeur": (33.9197, 8.1335),
+    "Kébili": (33.7044, 8.9690),
 }
 
 _cache: dict = {"t": 0.0, "data": None}
@@ -79,16 +92,18 @@ async def weather_risk():
         et = [v or 0.0 for v in loc["daily"]["et0_fao_evapotranspiration"]]
         p_sum, et_sum = sum(p), sum(et)
         deficit = min(1.0, max(0.0, 1 - p_sum / et_sum)) if et_sum > 0 else 0.0
-        out.append({
-            "name": name,
-            "lat": GOVERNORATES[name][0],
-            "lon": GOVERNORATES[name][1],
-            "rain_past_mm": round(sum(p[:PAST_DAYS]), 1),
-            "rain_next_mm": round(sum(p[PAST_DAYS:]), 1),
-            "et0_total_mm": round(et_sum, 1),
-            "deficit_index": round(deficit, 2),
-            "level": _level(deficit),
-        })
+        out.append(
+            {
+                "name": name,
+                "lat": GOVERNORATES[name][0],
+                "lon": GOVERNORATES[name][1],
+                "rain_past_mm": round(sum(p[:PAST_DAYS]), 1),
+                "rain_next_mm": round(sum(p[PAST_DAYS:]), 1),
+                "et0_total_mm": round(et_sum, 1),
+                "deficit_index": round(deficit, 2),
+                "level": _level(deficit),
+            }
+        )
     _cache.update(t=time.time(), data=out)
     return out
 

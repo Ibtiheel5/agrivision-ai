@@ -289,9 +289,15 @@ def predict_top3(
     margin_min: Optional[float] = Query(
         None, ge=0, le=1, description="Écart minimal entre la 1re et la 2e classe"
     ),
-    lat: Optional[float] = Form(None, ge=-90, le=90, description="Latitude (optionnelle, avec consentement)"),
-    lon: Optional[float] = Form(None, ge=-180, le=180, description="Longitude (optionnelle, avec consentement)"),
-    share_location: bool = Form(False, description="Autorise l'affichage anonymisé sur la carte (~1 km)"),
+    lat: Optional[float] = Form(
+        None, ge=-90, le=90, description="Latitude (optionnelle, avec consentement)"
+    ),
+    lon: Optional[float] = Form(
+        None, ge=-180, le=180, description="Longitude (optionnelle, avec consentement)"
+    ),
+    share_location: bool = Form(
+        False, description="Autorise l'affichage anonymisé sur la carte (~1 km)"
+    ),
 ):
     t0 = time.perf_counter()
     img = _read_image(file)
@@ -329,7 +335,9 @@ def predict_top3(
         best = max(detections, key=lambda d: d.confidence)
         if overall_status(preds) == "ok":
             try:
-                risk_map.save_analysis(lat, lon, None, best.label, best.confidence, _model_version(request))
+                risk_map.save_analysis(
+                    lat, lon, None, best.label, best.confidence, _model_version(request)
+                )
             except Exception:  # la carte ne doit jamais casser la prédiction
                 log.exception("save_analysis a échoué")
     return PredictResponse(

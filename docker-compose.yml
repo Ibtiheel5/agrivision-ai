@@ -1,7 +1,7 @@
 services:
   mlflow:
-    image: ghcr.io/mlflow/mlflow:latest
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow/mlflow.db --default-artifact-root /mlflow/artifacts
+    image: ghcr.io/mlflow/mlflow:v3.17.0
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////mlflow/mlflow.db --artifacts-destination /mlflow/artifacts
     ports: ["5000:5000"]
     volumes: ["./mlflow:/mlflow"]
   backend:
@@ -9,8 +9,16 @@ services:
     ports: ["8000:8000"]
     environment:
       MODEL_PATH: /models/best.onnx
-      MODEL_VERSION: "1"
+      CLASSES_PATH: /models/classes.txt
+      CONFIG_PATH: /models/inference_config.json
+      METRICS_PATH: /models/metrics.json
+      MLFLOW_URL: http://localhost:5000
     volumes: ["./models:/models:ro"]
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes: ["./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    depends_on: [backend]
   frontend:
     build: ./frontend
     ports: ["3000:80"]

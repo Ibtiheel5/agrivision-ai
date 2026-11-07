@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
@@ -36,6 +36,7 @@ from .schemas import (
 )
 
 from .metrics import PREDICTIONS, setup_metrics
+from .routers import advice, risk_map, weather
 
 log = logging.getLogger("agrivision")
 
@@ -63,7 +64,10 @@ DEFAULT_CONFIG = {
 MLFLOW_URL = os.getenv("MLFLOW_URL")
 CORS_ORIGINS = [
     o.strip()
-    for o in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+    for o in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:3000,http://localhost:5173,https://localhost,capacitor://localhost",
+    ).split(",")
 ]
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_MB", "10")) * 1024 * 1024
 
@@ -90,6 +94,10 @@ def _load_config() -> dict:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Charge le modèle une seule fois. S'il manque, l'API démarre quand même (503 sur /predict)."""
+    try:
+        risk_map.init_db()  # base SQLite des analyses géolocalisées (carte)
+    except Exception as e:
+        log.error("Base des analyses non initialisée : %s", e)
     app.state.metrics = _load_metrics()
     app.state.config = _load_config()
     app.state.detector = None
@@ -112,6 +120,9 @@ app.add_middleware(
 )
 
 setup_metrics(app)
+app.include_router(risk_map.router)
+app.include_router(weather.router)
+app.include_router(advice.router)
 
 
 def _model_version(request: Request) -> str:
@@ -278,6 +289,9 @@ def predict_top3(
     margin_min: Optional[float] = Query(
         None, ge=0, le=1, description="Écart minimal entre la 1re et la 2e classe"
     ),
+    lat: Optional[float] = Form(None, ge=-90, le=90, description="Latitude (optionnelle, avec consentement)"),
+    lon: Optional[float] = Form(None, ge=-180, le=180, description="Longitude (optionnelle, avec consentement)"),
+    share_location: bool = Form(False, description="Autorise l'affichage anonymisé sur la carte (~1 km)"),
 ):
     t0 = time.perf_counter()
     img = _read_image(file)
@@ -311,6 +325,13 @@ def predict_top3(
                 status=p.status,
             )
         )
+    if share_location and lat is not None and lon is not None and detections:
+        best = max(detections, key=lambda d: d.confidence)
+        if overall_status(preds) == "ok":
+            try:
+                risk_map.save_analysis(lat, lon, None, best.label, best.confidence, _model_version(request))
+            except Exception:  # la carte ne doit jamais casser la prédiction
+                log.exception("save_analysis a échoué")
     return PredictResponse(
         image_width=img.width,
         image_height=img.height,

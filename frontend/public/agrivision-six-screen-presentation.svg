@@ -1,0 +1,388 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200" role="img" aria-labelledby="title description">
+  <title id="title">AgriSahel — Présentation de six écrans de l’application AgriVision AI</title>
+  <desc id="description">Planche de présentation en français avec six écrans mobiles : accueil, détection IA, recommandations, carte des risques, historique et météo.</desc>
+  <defs>
+    <linearGradient id="page" x2="0" y2="1">
+      <stop stop-color="#f8fbf9"/>
+      <stop offset="1" stop-color="#edf3f0"/>
+    </linearGradient>
+    <linearGradient id="hero" x2="0" y2="1">
+      <stop stop-color="#b9daca"/>
+      <stop offset=".54" stop-color="#e7d8aa"/>
+      <stop offset="1" stop-color="#719b6f"/>
+    </linearGradient>
+    <linearGradient id="dry" x2="0" y2="1">
+      <stop stop-color="#eadfbf"/>
+      <stop offset="1" stop-color="#b99b62"/>
+    </linearGradient>
+    <linearGradient id="sea" x2="0" y2="1">
+      <stop stop-color="#d8eaf0"/>
+      <stop offset="1" stop-color="#add0d0"/>
+    </linearGradient>
+    <linearGradient id="screenMap" x2="1" y2="1">
+      <stop stop-color="#c5d9bb"/>
+      <stop offset=".55" stop-color="#e6dfbb"/>
+      <stop offset="1" stop-color="#d9cda6"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-20%" width="160%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="11" flood-color="#18382d" flood-opacity=".14"/>
+    </filter>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#173d30" flood-opacity=".10"/>
+    </filter>
+    <clipPath id="screenClip">
+      <rect x="7" y="7" width="266" height="466" rx="28"/>
+    </clipPath>
+    <g id="tree">
+      <path d="M17 51 20 24h7l4 27" fill="#765a3c"/>
+      <ellipse cx="22" cy="21" rx="18" ry="13" fill="#4c8160"/>
+      <ellipse cx="12" cy="24" rx="11" ry="8" fill="#67946d"/>
+      <ellipse cx="31" cy="24" rx="11" ry="8" fill="#3e7354"/>
+      <circle cx="16" cy="18" r="2" fill="#9db874"/>
+      <circle cx="29" cy="17" r="2" fill="#9db874"/>
+    </g>
+    <g id="dryPlant">
+      <path d="M98 140 95 59M97 91 68 64M96 105 121 73M95 76 81 45M97 120 70 102M99 81 113 49" fill="none" stroke="#795d31" stroke-width="4" stroke-linecap="round"/>
+      <path d="m69 64-14-10 5 15 13 3m39 1 11-13-3 17-11 5M81 45 71 33l16 5 5 9m22 2 9-12-1 18-12 5M70 102l-16-5 9 14 13-1" fill="#bd9b4d" stroke="#92713d" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M98 139v13m-4-1h9" stroke="#775834" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g id="healthyPlant">
+      <path d="M54 82V35m0 29L34 44m20 13 18-25M54 72 35 65m19-8 17-1" fill="none" stroke="#43825c" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="33" cy="42" rx="10" ry="5" transform="rotate(32 33 42)" fill="#2b8a68"/>
+      <ellipse cx="71" cy="34" rx="10" ry="5" transform="rotate(-40 71 34)" fill="#55a574"/>
+      <ellipse cx="35" cy="64" rx="10" ry="5" transform="rotate(16 35 64)" fill="#69a86f"/>
+      <ellipse cx="70" cy="57" rx="10" ry="5" transform="rotate(-12 70 57)" fill="#2b8a68"/>
+      <path d="M53 82v10m-9 0h19" stroke="#8f704d" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g id="nav">
+      <path d="M16 0 22 5v8h-5V8h-3v5H9V5z" fill="currentColor"/>
+      <circle cx="59" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="m56 6 2 2 4-5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M91 2h13v10H91zM95 0v3m5-3v3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="144" cy="4" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M136 13c1-5 15-5 16 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+    <g id="phone">
+      <rect width="280" height="480" rx="34" fill="#17261f" filter="url(#shadow)"/>
+      <rect x="5" y="5" width="270" height="470" rx="30" fill="#fff"/>
+      <g clip-path="url(#screenClip)">
+        <rect x="7" y="7" width="266" height="466" fill="#f3f6f8"/>
+        <rect x="105" y="9" width="70" height="13" rx="7" fill="#17261f"/>
+      </g>
+    </g>
+    <style>
+      text { font-family: Inter, "Segoe UI", Arial, sans-serif; fill: #20342c; }
+      .tiny { font-size: 7px; }
+      .micro { font-size: 8px; }
+      .small { font-size: 9px; }
+      .body { font-size: 10px; }
+      .medium { font-size: 12px; }
+      .title { font-size: 14px; font-weight: 750; }
+      .bold { font-weight: 700; }
+      .muted { fill: #718078; }
+      .green { fill: #078b69; }
+      .white { fill: #fff; }
+      .red { fill: #ba3e35; }
+      .orange { fill: #c97724; }
+      .line { stroke: #e3ebe6; }
+      .card { fill: #fff; stroke: #e7eeea; stroke-width: 1; }
+      .phone-caption { font-size: 14px; font-weight: 700; fill: #365447; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1200" fill="url(#page)"/>
+  <circle cx="1500" cy="65" r="135" fill="#e1efe8" opacity=".55"/>
+  <circle cx="1440" cy="5" r="75" fill="#d2e8dd" opacity=".55"/>
+  <g transform="translate(52 31)">
+    <circle cx="23" cy="23" r="22" fill="#078b69"/>
+    <path d="M13 31c0-12 8-20 23-22-1 14-8 22-20 22m1 1c3-8 8-13 15-18" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="58" y="21" font-size="27" font-weight="800" fill="#14543f">AgriSahel</text>
+    <text x="59" y="42" font-size="12" letter-spacing="1.7" fill="#718078">AGRIVISION AI · UNE AGRICULTURE PLUS RÉSILIENTE</text>
+  </g>
+  <text x="1545" y="49" text-anchor="end" font-size="11" font-weight="600" fill="#75847c">TUNISIE · SAHEL</text>
+  <text x="1545" y="68" text-anchor="end" font-size="10" fill="#8a9991">CONCEPT D’APPLICATION MOBILE</text>
+  <path d="M52 91h1496" stroke="#dfe9e3"/>
+
+  <!-- Screen 1: Home -->
+  <g transform="translate(84 111)">
+    <use href="#phone"/>
+    <text x="20" y="36" class="tiny muted">9:41</text>
+    <circle cx="239" cy="31" r="2" fill="#20342c"/><circle cx="246" cy="31" r="2" fill="#20342c"/>
+    <text x="20" y="63" font-size="15" font-weight="800" fill="#078b69">AgriSahel</text>
+    <circle cx="244" cy="56" r="11" fill="#e6f2eb"/>
+    <path d="M240 57c0-5 4-8 9-9-1 6-4 9-9 9m0 1 5-6" fill="none" stroke="#078b69" stroke-width="1.3"/>
+    <rect x="17" y="75" width="246" height="137" rx="15" fill="url(#hero)"/>
+    <circle cx="218" cy="105" r="19" fill="#f6d891" opacity=".9"/>
+    <path d="M17 159Q70 126 116 151t147 0v61H17z" fill="#8da779"/>
+    <path d="M17 174q55-31 114-1t132-2v41H17z" fill="#618a68"/>
+    <path d="M17 191q52-22 119-5t127-4v30H17z" fill="#416f54"/>
+    <use href="#tree" transform="translate(48 125) scale(.7)"/>
+    <use href="#tree" transform="translate(88 139) scale(.56)"/>
+    <use href="#tree" transform="translate(164 130) scale(.66)"/>
+    <use href="#tree" transform="translate(205 142) scale(.53)"/>
+    <rect x="27" y="88" width="155" height="40" rx="9" fill="#173d30" opacity=".77"/>
+    <text x="38" y="104" class="white" font-size="13" font-weight="750">Protégeons nos cultures</text>
+    <text x="38" y="118" class="white small">au Sahel, avec l’IA</text>
+    <text x="20" y="232" class="title">Bonjour, agriculteur 👋</text>
+    <text x="20" y="247" class="small muted">Vos cultures, surveillées intelligemment.</text>
+    <rect x="18" y="259" width="244" height="39" rx="11" fill="#078b69"/>
+    <path d="M36 279h14m-5-5 5 5-5 5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="139" y="283" text-anchor="middle" class="white body bold">Analyser une plante</text>
+    <g filter="url(#softShadow)">
+      <rect x="18" y="310" width="117" height="52" rx="11" class="card"/>
+      <rect x="145" y="310" width="117" height="52" rx="11" class="card"/>
+      <rect x="18" y="371" width="117" height="52" rx="11" class="card"/>
+      <rect x="145" y="371" width="117" height="52" rx="11" class="card"/>
+    </g>
+    <circle cx="38" cy="329" r="11" fill="#e6f2eb"/><path d="M32 331q4-9 12-9-1 8-10 10m0 0 6-6" fill="none" stroke="#078b69" stroke-width="1.2"/>
+    <text x="55" y="330" class="small bold">Mes parcelles</text><text x="29" y="348" class="tiny muted">3 parcelles suivies</text>
+    <circle cx="165" cy="329" r="11" fill="#e6f2eb"/><path d="M159 331a6 6 0 1 1 10 3m-4-12v7l4 2" fill="none" stroke="#078b69" stroke-width="1.2"/>
+    <text x="182" y="330" class="small bold">Météo</text><text x="156" y="348" class="tiny muted">28° · Médenine</text>
+    <circle cx="38" cy="390" r="11" fill="#fff1df"/><path d="M38 382v15m-5-8h10m-9-5 8 9" fill="none" stroke="#c97724" stroke-width="1.2"/>
+    <text x="55" y="391" class="small bold">Carte des risques</text><text x="29" y="409" class="tiny muted">Sécheresse et végétation</text>
+    <circle cx="165" cy="390" r="11" fill="#e6f2eb"/><path d="M161 384h8v12h-8zm2 3h4m-4 3h4" fill="none" stroke="#078b69" stroke-width="1.2"/>
+    <text x="182" y="391" class="small bold">Historique</text><text x="156" y="409" class="tiny muted">Vos dernières analyses</text>
+    <path d="M16 438h248" stroke="#e4ebe7"/>
+    <g class="tiny muted"><text x="31" y="454" fill="#078b69">Accueil</text><text x="88" y="454">Carte</text><text x="145" y="454">Historique</text><text x="216" y="454">Profil</text></g>
+    <circle cx="38" cy="441" r="2" fill="#078b69"/>
+    <rect x="102" y="466" width="76" height="3" rx="2" fill="#26372f"/>
+    <text x="140" y="507" text-anchor="middle" class="phone-caption">01 · ACCUEIL</text>
+  </g>
+
+  <!-- Screen 2: Detection -->
+  <g transform="translate(660 111)">
+    <use href="#phone"/>
+    <text x="20" y="36" class="tiny muted">9:41</text>
+    <circle cx="239" cy="31" r="2" fill="#20342c"/><circle cx="246" cy="31" r="2" fill="#20342c"/>
+    <path d="m26 54-5 5 5 5" fill="none" stroke="#20342c" stroke-width="1.6"/>
+    <text x="39" y="62" class="title">Détection de plante</text>
+    <text x="20" y="78" class="tiny muted">Analyse IA · votre parcelle</text>
+    <rect x="17" y="88" width="246" height="160" rx="13" fill="url(#dry)"/>
+    <circle cx="221" cy="112" r="17" fill="#f3d9a1" opacity=".86"/>
+    <path d="M17 173q46-28 92-8t154-13v96H17z" fill="#ab9a67"/>
+    <path d="M17 197q71-22 125-4t121-8v63H17z" fill="#867c55"/>
+    <path d="M17 225q75-20 140-3t106-8v34H17z" fill="#716a4d"/>
+    <use href="#tree" transform="translate(40 154) scale(.62)"/>
+    <use href="#tree" transform="translate(199 148) scale(.56)"/>
+    <use href="#dryPlant" transform="translate(69 91) scale(.9)"/>
+    <rect x="90" y="111" width="79" height="121" rx="3" fill="none" stroke="#d54437" stroke-width="2.4"/>
+    <rect x="91" y="96" width="104" height="17" rx="4" fill="#b7332c"/>
+    <text x="97" y="108" class="white tiny bold">Plante sèche · 0.87</text>
+    <g>
+      <rect x="18" y="257" width="46" height="36" rx="7" fill="#dfcfac"/>
+      <rect x="69" y="257" width="46" height="36" rx="7" fill="#ccd6ba"/>
+      <rect x="120" y="257" width="46" height="36" rx="7" fill="#e7d8b8"/>
+      <rect x="171" y="257" width="46" height="36" rx="7" fill="#c6d6c6"/>
+      <use href="#dryPlant" transform="translate(19 253) scale(.22)"/>
+      <use href="#tree" transform="translate(72 260) scale(.35)"/>
+      <use href="#dryPlant" transform="translate(126 257) scale(.21)"/>
+      <use href="#healthyPlant" transform="translate(167 251) scale(.48)"/>
+      <rect x="18" y="257" width="46" height="36" rx="7" fill="none" stroke="#078b69" stroke-width="2"/>
+    </g>
+    <rect x="17" y="302" width="246" height="102" rx="12" class="card" filter="url(#softShadow)"/>
+    <text x="29" y="321" class="medium bold">Plante sèche</text>
+    <rect x="189" y="310" width="62" height="17" rx="8" fill="#fbe8e5"/>
+    <text x="220" y="322" text-anchor="middle" class="tiny red bold">ÉTAT CRITIQUE</text>
+    <text x="29" y="341" class="small muted">Confiance : <tspan class="bold" fill="#20342c">87 %</tspan></text>
+    <path d="M29 351h218" stroke="#edf0ee"/>
+    <text x="29" y="367" class="tiny muted">Espèce estimée</text><text x="240" y="367" text-anchor="end" class="small bold">Olivier</text>
+    <text x="29" y="386" class="tiny muted">Zone détectée</text><text x="240" y="386" text-anchor="end" class="small bold">Feuilles et rameaux</text>
+    <rect x="18" y="413" width="104" height="34" rx="9" fill="#fff" stroke="#078b69"/>
+    <text x="70" y="434" text-anchor="middle" class="small green bold">Reprendre</text>
+    <rect x="131" y="413" width="131" height="34" rx="9" fill="#078b69"/>
+    <text x="196" y="434" text-anchor="middle" class="white small bold">Voir conseils</text>
+    <rect x="102" y="466" width="76" height="3" rx="2" fill="#26372f"/>
+    <text x="140" y="507" text-anchor="middle" class="phone-caption">02 · DÉTECTION IA</text>
+  </g>
+
+  <!-- Screen 3: Recommendations -->
+  <g transform="translate(1236 111)">
+    <use href="#phone"/>
+    <text x="20" y="36" class="tiny muted">9:41</text>
+    <circle cx="239" cy="31" r="2" fill="#20342c"/><circle cx="246" cy="31" r="2" fill="#20342c"/>
+    <path d="m26 54-5 5 5 5" fill="none" stroke="#20342c" stroke-width="1.6"/>
+    <text x="39" y="62" font-size="12" font-weight="750">Conseils et recommandations</text>
+    <rect x="17" y="77" width="246" height="77" rx="12" fill="#fff" stroke="#e7eeea"/>
+    <circle cx="49" cy="115" r="21" fill="#e5f2e9"/>
+    <use href="#healthyPlant" transform="translate(34 91) scale(.4)"/>
+    <text x="79" y="105" class="medium bold">Plante sèche</text>
+    <text x="79" y="121" class="small muted">Confiance : 87 %</text>
+    <rect x="79" y="130" width="85" height="15" rx="7" fill="#fbe8e5"/>
+    <text x="121" y="141" text-anchor="middle" class="tiny red bold">ÉTAT CRITIQUE</text>
+    <text x="20" y="176" class="medium bold">Les gestes à adopter</text>
+    <text x="20" y="190" class="tiny muted">Des actions simples pour votre olivier</text>
+    <rect x="17" y="199" width="246" height="39" rx="10" class="card"/>
+    <circle cx="34" cy="218" r="10" fill="#e4f2e9"/><text x="34" y="221" text-anchor="middle" class="small green bold">1</text>
+    <text x="51" y="216" class="small bold">Arrosez modérément mais</text><text x="51" y="228" class="small">régulièrement.</text>
+    <rect x="17" y="244" width="246" height="39" rx="10" class="card"/>
+    <circle cx="34" cy="263" r="10" fill="#e4f2e9"/><text x="34" y="266" text-anchor="middle" class="small green bold">2</text>
+    <text x="51" y="261" class="small bold">Évitez l’arrosage en plein</text><text x="51" y="273" class="small">soleil.</text>
+    <rect x="17" y="289" width="246" height="48" rx="10" class="card"/>
+    <circle cx="34" cy="313" r="10" fill="#e4f2e9"/><text x="34" y="316" text-anchor="middle" class="small green bold">3</text>
+    <text x="51" y="306" class="small bold">Paillez le sol pour conserver</text><text x="51" y="319" class="small">son humidité.</text>
+    <rect x="17" y="343" width="246" height="43" rx="10" class="card"/>
+    <circle cx="34" cy="364" r="10" fill="#e4f2e9"/><text x="34" y="367" text-anchor="middle" class="small green bold">4</text>
+    <text x="51" y="361" class="small bold">Vérifiez sol et présence</text><text x="51" y="373" class="small">de parasites.</text>
+    <rect x="17" y="393" width="246" height="48" rx="10" fill="#e7f3eb" stroke="#d2e9db"/>
+    <circle cx="34" cy="417" r="9" fill="#078b69"/><path d="M34 412v10m-4-5h8" stroke="#fff" stroke-width="1.4"/>
+    <text x="50" y="412" class="tiny green bold">CONSEIL SPÉCIAL SAHEL</text>
+    <text x="50" y="425" class="tiny">Préservez l’eau : arrosez tôt et paillez.</text>
+    <rect x="17" y="448" width="246" height="23" rx="8" fill="#078b69"/>
+    <text x="140" y="464" text-anchor="middle" class="white small bold">Retour à l’accueil</text>
+    <rect x="102" y="466" width="76" height="3" rx="2" fill="#26372f"/>
+    <text x="140" y="507" text-anchor="middle" class="phone-caption">03 · RECOMMANDATIONS</text>
+  </g>
+
+  <!-- Screen 4: Risk map -->
+  <g transform="translate(84 661)">
+    <use href="#phone"/>
+    <text x="20" y="36" class="tiny muted">9:41</text>
+    <circle cx="239" cy="31" r="2" fill="#20342c"/><circle cx="246" cy="31" r="2" fill="#20342c"/>
+    <path d="m26 54-5 5 5 5" fill="none" stroke="#20342c" stroke-width="1.6"/>
+    <text x="39" y="62" class="title">Carte des risques</text>
+    <text x="20" y="78" class="tiny muted">Sahel tunisien · actualisée aujourd’hui</text>
+    <rect x="13" y="87" width="254" height="290" rx="13" fill="url(#screenMap)"/>
+    <path d="M14 137q43-29 86-5t76-4q47-20 91 8" fill="none" stroke="#a9c2a4" stroke-width="9" opacity=".75"/>
+    <path d="M13 177q41-22 76 4t75-5q52-19 103 8" fill="none" stroke="#b1c69c" stroke-width="10" opacity=".8"/>
+    <path d="M14 229q52-24 94 0t77-2q37-15 80 7" fill="none" stroke="#d3c98f" stroke-width="12" opacity=".75"/>
+    <path d="M14 283q36-21 75-1t74 0q54-28 103-2" fill="none" stroke="#e5bd68" stroke-width="13" opacity=".8"/>
+    <path d="M14 337q47-30 88-6t83-3q43-17 80 8" fill="none" stroke="#df9560" stroke-width="12" opacity=".66"/>
+    <path d="M32 104 70 141l-16 43 47 41-17 52 48 46-9 44m74-253-27 53 24 48-38 46 25 48-39 49" fill="none" stroke="#fbfcf4" stroke-width="2" opacity=".9"/>
+    <path d="M27 130h221M22 205h233M23 263h229M35 323h211" fill="none" stroke="#fafbf3" stroke-width="1.4" opacity=".9"/>
+    <path d="M83 146q42-27 77 10t62 5" fill="none" stroke="#d9b945" stroke-width="21" opacity=".36"/>
+    <path d="M122 219q42-23 87 2t28 42" fill="none" stroke="#ee7b37" stroke-width="22" opacity=".42"/>
+    <path d="M93 305q38-27 79 4t74-2" fill="none" stroke="#d64f3f" stroke-width="19" opacity=".34"/>
+    <path d="M36 139q44-23 90 2" fill="none" stroke="#fff" stroke-width="4" opacity=".85"/>
+    <path d="M186 171q34-14 57 7" fill="none" stroke="#fff" stroke-width="4" opacity=".85"/>
+    <g fill="#20342c" font-size="8" font-weight="700">
+      <circle cx="96" cy="134" r="4" fill="#078b69"/><text x="103" y="132">Gabès</text>
+      <circle cx="158" cy="222" r="4" fill="#df7d29"/><text x="165" y="220">Médenine</text>
+      <circle cx="109" cy="309" r="4" fill="#bd473e"/><text x="116" y="307">Tataouine</text>
+    </g>
+    <rect x="224" y="99" width="31" height="67" rx="8" fill="#fff" filter="url(#softShadow)"/>
+    <text x="239" y="119" text-anchor="middle" font-size="15" fill="#27443a">+</text>
+    <path d="M230 132h18" stroke="#e5ebe7"/>
+    <text x="239" y="154" text-anchor="middle" font-size="16" fill="#27443a">−</text>
+    <circle cx="239" cy="349" r="15" fill="#fff" filter="url(#softShadow)"/>
+    <circle cx="239" cy="349" r="5" fill="none" stroke="#078b69" stroke-width="1.6"/>
+    <path d="M239 339v5m0 10v5m-10-10h5m10 0h5" stroke="#078b69" stroke-width="1.4"/>
+    <rect x="23" y="323" width="120" height="43" rx="8" fill="#fff" opacity=".96"/>
+    <text x="32" y="337" class="tiny bold">RISQUE DE SÉCHERESSE</text>
+    <circle cx="35" cy="348" r="3.5" fill="#5b9c68"/><text x="42" y="351" class="tiny">Faible</text>
+    <circle cx="78" cy="348" r="3.5" fill="#e1c74e"/><text x="85" y="351" class="tiny">Modéré</text>
+    <circle cx="35" cy="360" r="3.5" fill="#e58a31"/><text x="42" y="363" class="tiny">Élevé</text>
+    <circle cx="78" cy="360" r="3.5" fill="#c74a3d"/><text x="85" y="363" class="tiny">Très élevé</text>
+    <path d="M16 438h248" stroke="#e4ebe7"/>
+    <g class="tiny muted"><text x="31" y="454">Accueil</text><text x="88" y="454" fill="#078b69">Carte</text><text x="145" y="454">Historique</text><text x="216" y="454">Profil</text></g>
+    <circle cx="96" cy="441" r="2" fill="#078b69"/>
+    <rect x="102" y="466" width="76" height="3" rx="2" fill="#26372f"/>
+    <text x="140" y="507" text-anchor="middle" class="phone-caption">04 · CARTE DES RISQUES</text>
+  </g>
+
+  <!-- Screen 5: History -->
+  <g transform="translate(660 661)">
+    <use href="#phone"/>
+    <text x="20" y="36" class="tiny muted">9:41</text>
+    <circle cx="239" cy="31" r="2" fill="#20342c"/><circle cx="246" cy="31" r="2" fill="#20342c"/>
+    <text x="20" y="62" class="title">Historique des analyses</text>
+    <text x="20" y="78" class="tiny muted">Retrouvez les observations de vos parcelles.</text>
+    <rect x="17" y="89" width="203" height="35" rx="10" fill="#fff" stroke="#e2eae5"/>
+    <circle cx="33" cy="105" r="5" fill="none" stroke="#74847b" stroke-width="1.3"/>
+    <path d="m37 109 4 4" stroke="#74847b" stroke-width="1.3"/>
+    <text x="48" y="108" class="small muted">Rechercher une analyse</text>
+    <rect x="226" y="89" width="37" height="35" rx="10" fill="#fff" stroke="#e2eae5"/>
+    <path d="M237 99h15m-12 5h9m-6 5h3" stroke="#078b69" stroke-width="1.4" stroke-linecap="round"/>
+    <text x="20" y="148" class="small bold">Cette semaine</text>
+    <rect x="17" y="158" width="246" height="75" rx="11" class="card" filter="url(#softShadow)"/>
+    <rect x="25" y="168" width="56" height="55" rx="8" fill="url(#dry)"/>
+    <use href="#dryPlant" transform="translate(22 170) scale(.36)"/>
+    <text x="91" y="179" class="body bold">Plante sèche</text>
+    <rect x="190" y="167" width="62" height="16" rx="8" fill="#fbe8e5"/>
+    <text x="221" y="178" text-anchor="middle" class="tiny red bold">CRITIQUE</text>
+    <text x="91" y="195" class="tiny muted">Aujourd’hui · 09:42</text>
+    <circle cx="96" cy="212" r="3" fill="#078b69"/><text x="104" y="215" class="tiny muted">Médenine</text>
+    <text x="239" y="215" text-anchor="end" class="small bold red">87 %</text>
+    <rect x="17" y="242" width="246" height="75" rx="11" class="card" filter="url(#softShadow)"/>
+    <rect x="25" y="252" width="56" height="55" rx="8" fill="#c7d7bd"/>
+    <use href="#tree" transform="translate(36 260) scale(.65)"/>
+    <text x="91" y="263" class="body bold">Plante fanée</text>
+    <rect x="190" y="251" width="62" height="16" rx="8" fill="#fff1df"/>
+    <text x="221" y="262" text-anchor="middle" class="tiny orange bold">MODÉRÉ</text>
+    <text x="91" y="279" class="tiny muted">Hier · 16:18</text>
+    <circle cx="96" cy="296" r="3" fill="#078b69"/><text x="104" y="299" class="tiny muted">Tataouine</text>
+    <text x="239" y="299" text-anchor="end" class="small bold orange">64 %</text>
+    <rect x="17" y="326" width="246" height="75" rx="11" class="card" filter="url(#softShadow)"/>
+    <rect x="25" y="336" width="56" height="55" rx="8" fill="#d5e0c3"/>
+    <use href="#healthyPlant" transform="translate(28 336) scale(.63)"/>
+    <text x="91" y="347" class="body bold">Plante saine</text>
+    <rect x="190" y="335" width="62" height="16" rx="8" fill="#e4f2e9"/>
+    <text x="221" y="346" text-anchor="middle" class="tiny green bold">NORMAL</text>
+    <text x="91" y="363" class="tiny muted">29 oct. · 10:06</text>
+    <circle cx="96" cy="380" r="3" fill="#078b69"/><text x="104" y="383" class="tiny muted">Gabès</text>
+    <text x="239" y="383" text-anchor="end" class="small bold green">96 %</text>
+    <rect x="17" y="410" width="246" height="30" rx="9" fill="#e8f3ec"/>
+    <text x="140" y="429" text-anchor="middle" class="small green bold">3 analyses · 3 parcelles suivies</text>
+    <path d="M16 449h248" stroke="#e4ebe7"/>
+    <g class="tiny muted"><text x="31" y="463">Accueil</text><text x="88" y="463">Carte</text><text x="145" y="463" fill="#078b69">Historique</text><text x="216" y="463">Profil</text></g>
+    <circle cx="165" cy="450" r="2" fill="#078b69"/>
+    <rect x="102" y="466" width="76" height="3" rx="2" fill="#26372f"/>
+    <text x="140" y="507" text-anchor="middle" class="phone-caption">05 · HISTORIQUE</text>
+  </g>
+
+  <!-- Screen 6: Weather -->
+  <g transform="translate(1236 661)">
+    <use href="#phone"/>
+    <text x="20" y="36" class="tiny muted">9:41</text>
+    <circle cx="239" cy="31" r="2" fill="#20342c"/><circle cx="246" cy="31" r="2" fill="#20342c"/>
+    <text x="20" y="62" class="title">Météo et alertes</text>
+    <circle cx="24" cy="78" r="3" fill="#078b69"/>
+    <text x="33" y="81" class="small muted">Médenine, Tunisie</text>
+    <rect x="17" y="91" width="246" height="110" rx="13" fill="#e8f2f1"/>
+    <circle cx="83" cy="135" r="25" fill="#f2c55c"/>
+    <g stroke="#e6aa3f" stroke-width="2" stroke-linecap="round">
+      <path d="M83 99v-5m0 82v-5m-36-36h-5m82 0h-5m-61-25-4-4m58 58-4-4m0-50 4-4m-58 58 4-4"/>
+    </g>
+    <text x="127" y="132" font-size="31" font-weight="750">28°</text>
+    <text x="130" y="150" class="small muted">Ensoleillé</text>
+    <text x="28" y="184" class="tiny muted">RESSENTI 30° · INDICE UV ÉLEVÉ</text>
+    <g>
+      <rect x="17" y="209" width="56" height="50" rx="9" fill="#fff" stroke="#e7eeea"/>
+      <rect x="80" y="209" width="56" height="50" rx="9" fill="#fff" stroke="#e7eeea"/>
+      <rect x="143" y="209" width="56" height="50" rx="9" fill="#fff" stroke="#e7eeea"/>
+      <rect x="206" y="209" width="57" height="50" rx="9" fill="#fff" stroke="#e7eeea"/>
+    </g>
+    <text x="45" y="222" text-anchor="middle" class="tiny muted">HUMIDITÉ</text><text x="45" y="242" text-anchor="middle" class="medium bold">45%</text>
+    <text x="108" y="222" text-anchor="middle" class="tiny muted">VENT</text><text x="108" y="242" text-anchor="middle" class="medium bold">18 km/h</text>
+    <text x="171" y="222" text-anchor="middle" class="tiny muted">PLUIE</text><text x="171" y="242" text-anchor="middle" class="medium bold">0 mm</text>
+    <text x="234" y="222" text-anchor="middle" class="tiny muted">HUMIDITÉ SOL</text><text x="234" y="242" text-anchor="middle" class="medium bold">Faible</text>
+    <text x="20" y="279" class="small bold">Prévisions · 4 jours</text>
+    <g class="tiny muted" text-anchor="middle">
+      <text x="47" y="295">AUJ.</text><text x="108" y="295">MAR.</text><text x="169" y="295">MER.</text><text x="232" y="295">JEU.</text>
+    </g>
+    <g fill="#f1bf50">
+      <circle cx="47" cy="313" r="7"/><circle cx="108" cy="313" r="6"/>
+      <path d="M162 307h14a6 6 0 0 1 0 12h-14a6 6 0 0 1 0-12" fill="#c9dbe1"/>
+      <circle cx="232" cy="313" r="7"/>
+    </g>
+    <g class="small bold" text-anchor="middle">
+      <text x="47" y="338">28°</text><text x="108" y="338">30°</text><text x="169" y="338">27°</text><text x="232" y="338">29°</text>
+    </g>
+    <rect x="17" y="349" width="246" height="41" rx="10" fill="#fbe9e6" stroke="#f2d2ce"/>
+    <circle cx="34" cy="369" r="9" fill="#bd473e"/>
+    <text x="34" y="372" text-anchor="middle" class="white small bold">!</text>
+    <text x="50" y="366" class="small red bold">Alerte sécheresse</text>
+    <text x="50" y="379" class="tiny red">Chaleur et faibles précipitations prévues.</text>
+    <rect x="17" y="398" width="246" height="43" rx="10" fill="#e7f3eb" stroke="#d6eadd"/>
+    <circle cx="34" cy="419" r="9" fill="#078b69"/>
+    <path d="M30 420q4-8 9-8-1 7-8 9m0 0 5-5" fill="none" stroke="#fff" stroke-width="1.2"/>
+    <text x="50" y="415" class="small green bold">Recommandations météo</text>
+    <text x="50" y="429" class="tiny">Arrosez tôt le matin, paillez le pied.</text>
+    <path d="M16 449h248" stroke="#e4ebe7"/>
+    <g class="tiny muted"><text x="31" y="463">Accueil</text><text x="88" y="463">Carte</text><text x="145" y="463">Historique</text><text x="216" y="463">Profil</text></g>
+    <circle cx="235" cy="450" r="2" fill="#078b69"/>
+    <rect x="102" y="466" width="76" height="3" rx="2" fill="#26372f"/>
+    <text x="140" y="507" text-anchor="middle" class="phone-caption">06 · MÉTÉO &amp; ALERTES</text>
+  </g>
+
+  <text x="800" y="1176" text-anchor="middle" font-size="10" letter-spacing="1.4" fill="#809088">SURVEILLER · COMPRENDRE · AGIR — POUR DES CULTURES PLUS RÉSILIENTES</text>
+</svg>

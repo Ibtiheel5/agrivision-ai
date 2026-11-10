@@ -26,6 +26,20 @@ def test_metadata(client):
     assert body["validation_metrics"]["mAP50"] == 0.5
 
 
+def test_metadata_includes_local_benchmark(client, monkeypatch, tmp_path):
+    benchmark_path = tmp_path / "benchmark.json"
+    benchmark_path.write_text('{"p50_ms": 20.0, "p95_ms": 35.0}', encoding="utf-8")
+    monkeypatch.setattr(main, "BENCHMARK_PATH", benchmark_path)
+
+    response = client.get("/model/metadata")
+
+    assert response.status_code == 200
+    benchmark = response.json()["benchmark_cpu"]["onnx_fp32_cpu"]
+    assert benchmark["p50_ms"] == 20.0
+    assert benchmark["p95_ms"] == 35.0
+    assert benchmark["fps"] == 50.0
+
+
 def test_predict_returns_single_nms_detection(client, jpeg_bytes):
     r = client.post("/predict", files={"file": ("leaf.jpg", jpeg_bytes, "image/jpeg")})
     assert r.status_code == 200

@@ -8,33 +8,23 @@
      la latence, la calibration et les petits fichiers de config ;
   3. enregistre une version dans le Registry et lui donne l'alias `champion`.
 
-Le poids best.onnx (38 Mo) n'est PAS copié dans MLflow : il reste versionné par
-DVC. La version du Registry garde l'empreinte md5 du .dvc pour retrouver le modèle
-exact (`dvc pull` sur le commit Git indiqué).
+L'artefact ONNX et son checkpoint sont inclus dans les artefacts MLflow du run
+retenu, tandis que DVC versionne le répertoire de release. Le registry conserve
+le commit Git et l'empreinte de dvc.lock pour retrouver les entrées exactes.
 
 Usage (depuis la racine du dépôt, serveur MLflow lancé) :
     python scripts/register_model.py [--tracking-uri http://127.0.0.1:5000]
 """
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
 from pathlib import Path
 
 import mlflow
-import yaml
 from mlflow import MlflowClient
-
-SMALL_FILES = [
-    "models/metrics.json",
-    "models/inference_config.json",
-    "models/classes.txt",
-    "models/benchmark_local.json",
-    "models/best.onnx.dvc",
-    "params.yaml",
-    "dvc.lock",
-]
 
 
 def load_json(path: str) -> dict:
@@ -54,11 +44,10 @@ def git_commit() -> str:
         return "inconnu"
 
 
-def dvc_md5(dvc_file: str) -> str:
+def dvc_lock_sha256() -> str:
     try:
-        data = yaml.safe_load(Path(dvc_file).read_text(encoding="utf-8"))
-        return data["outs"][0]["md5"]
-    except (OSError, KeyError, IndexError, TypeError):
+        return hashlib.sha256(Path("dvc.lock").read_bytes()).hexdigest()
+    except OSError:
         return "inconnu"
 
 
@@ -73,7 +62,7 @@ def log_validation(row: dict) -> None:
     )
 
 
-def log_selected_run(metrics: dict, config: dict) -> None:
+def log_selected_run(metrics: dict, config: dict, model_dir: Path) -> None:
     mlflow.log_params({k: str(v) for k, v in metrics.get("params", {}).items()})
     mlflow.log_params(
         {
@@ -101,12 +90,21 @@ def log_selected_run(metrics: dict, config: dict) -> None:
             }
         )
     calib = metrics.get("calibration_top3") or {}
-    mlflow.log_metrics(
-        {f"calib_{k}": v for k, v in calib.items() if isinstance(v, float)}
-    )
-    for f in SMALL_FILES:
-        if Path(f).exists():
-            mlflow.log_artifact(f, artifact_path="model_ref")
+    mlflow.log_metrics({f"calib_{k}": v for k, v in calib.items() if isinstance(v, float)})
+    files = [
+        model_dir / "metrics.json",
+        model_dir / "inference_config.json",
+        model_dir / "classes.txt",
+        model_dir / "best.onnx",
+        model_dir / "best.pt",
+        local,
+        Path("params.yaml"),
+        Path("dvc.yaml"),
+        Path("dvc.lock"),
+    ]
+    for file_path in files:
+        if file_path.exists():
+            mlflow.log_artifact(str(file_path), artifact_path="model_ref")
 
 
 def main() -> int:
@@ -114,26 +112,27 @@ def main() -> int:
     ap.add_argument("--tracking-uri", default="http://127.0.0.1:5000")
     ap.add_argument("--experiment", default="agrivision")
     ap.add_argument("--model-name", default="agrivision-detector")
+    ap.add_argument("--model-dir", default="models/release")
     args = ap.parse_args()
+    model_dir = Path(args.model_dir)
 
     gate = subprocess.run([sys.executable, "scripts/check_gate.py"])
     if gate.returncode != 0:
         print("Porte d'évaluation en échec : rien n'est enregistré.")
         return 1
 
-    metrics = load_json("models/metrics.json")
-    config = load_json("models/inference_config.json")
+    metrics = load_json(str(model_dir / "metrics.json"))
+    config = load_json(str(model_dir / "inference_config.json"))
     selected = config["model"]
 
     mlflow.set_tracking_uri(args.tracking_uri)
     mlflow.set_experiment(args.experiment)
     client = MlflowClient()
-    commit, md5 = git_commit(), dvc_md5("models/best.onnx.dvc")
+    commit, lock_hash = git_commit(), dvc_lock_sha256()
 
-    selected_run_id = None
     for row in metrics["comparaison_val"]:
         name = row["run"]
-        with mlflow.start_run(run_name=name) as run:
+        with mlflow.start_run(run_name=name):
             mlflow.set_tags(
                 {
                     "source": "import depuis metrics.json (entraînement Kaggle)",
@@ -143,30 +142,31 @@ def main() -> int:
             )
             log_validation(row)
             if name == selected:
-                mlflow.set_tag("dvc_md5_best_onnx", md5)
-                log_selected_run(metrics, config)
-                selected_run_id = run.info.run_id
+                mlflow.set_tag("dvc_lock_sha256", lock_hash)
+                log_selected_run(metrics, config, model_dir)
+    selected_run_id = metrics.get("mlflow_comparison_run_id")
     if selected_run_id is None:
-        print(f"ECHEC : run '{selected}' absent de comparaison_val")
+        print("ECHEC : metrics.json ne référence pas le run MLflow complet du modèle ONNX.")
+        print("Lancez le pipeline DVC d'entraînement et d'évaluation avant l'enregistrement.")
         return 1
 
     try:
         client.create_registered_model(
             args.model_name,
-            description="Détecteur de maladies foliaires (YOLO11s, ONNX FP32)",
+            description="Détecteur de maladies foliaires YOLO servi par ONNX Runtime.",
         )
     except mlflow.exceptions.MlflowException:
         pass  # le modèle existe déjà : on ajoute une version
     version = client.create_model_version(
         name=args.model_name,
-        source=f"runs:/{selected_run_id}/model_ref",
+        source=f"runs:/{selected_run_id}/model",
         run_id=selected_run_id,
-        tags={"git_commit": commit, "dvc_md5_best_onnx": md5, "gate": "OK"},
+        tags={"git_commit": commit, "dvc_lock_sha256": lock_hash, "gate": "OK"},
     )
     client.set_registered_model_alias(args.model_name, "champion", version.version)
     print(
         f"{args.model_name} v{version.version} (alias champion) <- run "
-        f"{selected_run_id} | commit {commit} | md5 {md5}"
+        f"{selected_run_id} | commit {commit} | dvc.lock {lock_hash[:12]}"
     )
     print(f"UI : {args.tracking_uri}/#/models/{args.model_name}")
     return 0

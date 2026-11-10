@@ -1,37 +1,51 @@
 services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.17.0
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////mlflow/mlflow.db --serve-artifacts --default-artifact-root mlflow-artifacts:/ --artifacts-destination /mlflow/artifacts
+    ports: ["5000:5000"]
+    volumes: ["./mlflow:/mlflow"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
   backend:
     build: ./backend
     environment:
-      MODEL_DIR: /models
+      MODEL_DIR: ${AGRIVISION_MODEL_DIR:-/models}
       CORS_ORIGINS: "*"
       MAX_UPLOAD_MB: "10"
       MLFLOW_URL: http://mlflow:5000
+      BENCHMARK_PATH: ${AGRIVISION_MODEL_DIR:-/models}/benchmark_local.json
     volumes:
       - ./models:/models:ro
       - ./data:/app/data
     ports: ["8000:8000"]
-    restart: unless-stopped
-
-  frontend:
-    build: ./frontend
-    depends_on:
-      backend: { condition: service_healthy }
-    ports: ["8090:80"]               # application : http://localhost:8080
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:latest
     ports: ["9090:9090"]
     volumes: ["./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
-    depends_on: [backend]
+    depends_on:
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:v3.17.0
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////mlflow/mlflow.db --serve-artifacts --default-artifact-root mlflow-artifacts:/ --artifacts-destination /mlflow/artifacts
-    volumes: [mlflow-data:/mlflow]
-    ports: ["5000:5000"]
+  frontend:
+    build: ./frontend
+    ports: ["3000:80"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
-
-volumes:
-  mlflow-data:

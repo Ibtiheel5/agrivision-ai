@@ -1,83 +1,68 @@
-# AgriVision IA
+# AgriVision Tunisia
 
-Détection de maladies foliaires (YOLO11s, PlantDoc + PlantSeg) avec cycle MLOps complet :
-DVC · MLflow · ONNX Runtime · FastAPI · React (PWA mobile) · Docker Compose · GitHub Actions.
-Module *Deep Learning Avancé* — **Axe 3 : détection d'objets en temps réel** — TEK-UP.
+Projet du module Deep Learning Avancé & MLOps : détection de maladies foliaires avec YOLO, API FastAPI et interface React.
 
-## Démarrage en une commande
+Le sujet est cadré sur **l'Axe 3 du guide du professeur : détection d'objets en temps réel**. YOLO est conservé comme modèle central. Le Jalon 1, les écarts constatés et la matrice de conformité sont décrits dans [docs/JALON_1_CADRAGE.md](docs/JALON_1_CADRAGE.md).
 
-1. Le modèle AgriVision v4 (`best.onnx`, `best.pt`, `classes.txt` et métadonnées) est dans `models/`.
-2. `docker compose up --build`
+## État du dépôt
 
-| Service | URL |
-|---|---|
-| Application (PWA) | http://localhost:8080 |
-| API + Swagger | http://localhost:8000/docs |
-| MLflow | http://localhost:5000 |
+Le dépôt contient déjà un frontend React/Vite, un backend FastAPI avec inférence ONNX, une application Capacitor, Docker Compose, DVC, MLflow, Prometheus et des workflows GitHub Actions. Le modèle courant est YOLO11s avec 29 classes issues du jeu de données documenté dans `params.yaml`.
 
-Sans modèle, l'API répond **503** (comportement voulu) et l'app affiche l'erreur.
+Les données brutes ne sont pas présentes dans le dépôt : `data/raw` contient un fichier `.gitkeep`. Les métriques et artefacts existants ne doivent donc pas être présentés comme un entraînement reproductible depuis ce checkout. Le pipeline DVC YOLOv8n/YOLO11s est configuré mais n'a pas encore été exécuté; le `dvc.lock` actuel correspond à l'ancien stage de gate jusqu'à la première exécution avec les données.
 
-## Utilisation sur téléphone (application mobile)
-
-L'interface est une **PWA React mobile-first** (le guide impose React ou Angular) :
-1. PC et téléphone sur le même Wi-Fi ; ouvrez `http://<IP-du-PC>:8080` dans Chrome Android.
-2. Menu ⋮ → **Installer l'application** : icône sur l'écran d'accueil, plein écran, historique hors-ligne.
-3. Bouton **Sawwer bel telifoun** : ouvre l'appareil photo arrière (marche en HTTP).
-4. La webcam / détection continue exige **HTTPS** sur téléphone : `cloudflared tunnel --url http://localhost:8080`
-   (ou `ngrok http 8080`) donne une URL HTTPS publique temporaire.
-5. Option : APK Android via Capacitor (`npm i @capacitor/core @capacitor/cli @capacitor/android`,
-   `npx cap init`, `npm run build`, `npx cap add android`, `npx cap sync`) — non testé ici.
-
-## Développement local
+## Démarrage local
 
 ```bash
-# Backend
-cd backend && python -m venv .venv && .venv\Scripts\activate   # Linux/Mac : source .venv/bin/activate
-pip install -r requirements-dev.txt
-MODEL_DIR=../models uvicorn app.main:app --reload  # PowerShell : $env:MODEL_DIR="../models"
-python -m pytest -q
-# Frontend (proxy /api -> :8000)
-cd frontend && npm ci && npm run dev && npm run lint && npm test
-```'"
-## Pipeline ML (DVC)
+docker compose up --build
+```
+
+- Frontend : http://localhost:3000
+- API et Swagger : http://localhost:8000/docs
+- Santé API : http://localhost:8000/health
+- MLflow : http://localhost:5000
+- Prometheus : http://localhost:9090
+
+L'API charge les artefacts locaux sous `models/`. Récupérez-les avec DVC si nécessaire et configurez l'accès au remote dans l'environnement local; ne placez aucun secret dans Git.
+
+## DVC et expérimentation
+
+La préparation attend des images et annotations YOLO organisées comme dans [le cadrage Jalon 1](docs/JALON_1_CADRAGE.md). PlantDoc est séparé en train/validation/test de façon déterministe; les images PlantSeg, si elles sont présentes, sont ajoutées au train seulement et plafonnées par classe selon `params.yaml`.
 
 ```bash
 pip install -r requirements-ml.txt
-git init && dvc init
-dvc add data/raw                       # PlantDoc + PlantSeg dans data/raw/plantdoc et data/raw/plantseg
-dvc remote add -d storage <gdrive://... | s3://... | /chemin/local>
-mlflow server --port 5000              # ou : docker compose up mlflow
-dvc repro                              # prepare -> train -> evaluate -> export
-python scripts/register_model.py --stage staging     # puis --stage production si la porte d'évaluation passe
-dvc push && git add . && git commit
-```
-
-Pour importer dans MLflow les artefacts et métriques du modèle déjà entraîné sur Kaggle :
-
-```powershell
 docker compose up -d mlflow
-.\.venv-ml\Scripts\python.exe scripts\import_model_mlflow.py
+dvc pull
+dvc status
+dvc repro
 ```
 
-Cette importation crée un run d'artefacts; elle ne reconstitue pas les métriques par époque ni les courbes si elles ne sont pas fournies.
+Placez les données validées dans `data/raw/plantdoc/{images,labels}` et, facultativement, dans `data/raw/plantseg/{images,labels}`. PlantSeg est toujours train-only. Une fois le dataset préparé, ajoutez-le au remote DVC (`dvc add data/raw`, puis `dvc push`); les images et poids ne vont jamais dans Git. Le pipeline compare YOLOv8n et YOLO11s sur validation, évalue le test après sélection, exporte ONNX, mesure la latence et applique la porte de qualité. MLflow doit être accessible sur `http://127.0.0.1:5000` pendant l'entraînement.
 
-L'entraînement peut aussi se faire sur Kaggle ; il suffit de déposer `best.pt`, puis `dvc repro export`.
+Après production d'un modèle `models/release`, sélectionnez-le pour Docker Compose avec un `.env` à la racine contenant `AGRIVISION_MODEL_DIR=/models/release`, puis redémarrez les services. La valeur par défaut `/models` continue d'utiliser les artefacts historiques déjà présents.
 
-## Correspondance avec le guide de l'enseignant
+Enregistrez une release ayant passé la gate avec `python scripts/register_model.py --tracking-uri http://127.0.0.1:5000`.
 
-| Exigence du guide | Où |
-|---|---|
-| FastAPI `/health`, `/model/metadata`, `/predict`, `/predict/visualize`, Swagger, Pydantic, 400 / 503 | `backend/app/` |
-| Tests Pytest (endpoints, NMS, prétraitement, 400/503/413) | `backend/tests/`, `tests/` |
-| Frontend : drag & drop, galerie, webcam, canvas de boîtes, barres de scores, latence client + serveur | `frontend/src/` |
-| ONNX Runtime + parité + benchmark | `backend/app/inference.py`, `src/models/export_onnx.py` |
-| DVC (`dvc.yaml`, `params.yaml`), anti-fuite de données | `dvc.yaml`, `src/data/dataset.py` |
-| MLflow tracking + Registry (porte d'évaluation) | `src/models/train.py`, `scripts/register_model.py` |
-| Docker multi-stage + Compose | `backend/Dockerfile`, `frontend/Dockerfile`, `docker-compose.yml` |
-| CI/CD | `.github/workflows/ci-tests.yml`, `docker-build.yml` |
-| Rapport LaTeX | `docs/` (à rédiger avec vos résultats réels) |
+## Tests et qualité
 
-## Limites
+```bash
+pip install -r backend/requirements-dev.txt pyyaml
+flake8 backend src --max-line-length 100
+black --check backend src
+cd backend
+PYTHONPATH=.. python -m pytest -q
+cd ..
 
-Aide à la décision, pas un diagnostic certifié. PlantDoc/PlantSeg ≠ conditions réelles de terrain
-(prévoir quelques photos de champ hors dataset). Utilisez le jeu de test une seule fois, à la fin.
+cd frontend
+npm ci
+npm run lint
+npm test
+npm run build
+```
+
+Les résultats doivent être rapportés uniquement après exécution réelle des commandes. La CI GitHub Actions exécute les vérifications configurées pour le dépôt.
+
+## Documentation
+
+- [Cadrage Jalon 1, architecture, matrice et roadmap](docs/JALON_1_CADRAGE.md)
+
+Les résultats scientifiques, benchmarks ONNX, rapport final LaTeX/PDF et preuve de soutenance seront ajoutés après réalisation et validation des jalons correspondants.

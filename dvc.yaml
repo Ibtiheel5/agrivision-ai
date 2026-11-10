@@ -1,22 +1,79 @@
+# Pipeline YOLO reproductible : préparation -> deux entraînements -> sélection/export -> benchmark -> gate.
 stages:
   prepare:
-    cmd: python -m src.data.dataset --params params.yaml
-    deps: [src/data/dataset.py, data/raw]
-    params: [data, seed]
-    outs: [data/processed]
-  train:
-    cmd: python -m src.models.train --params params.yaml
-    deps: [src/models/train.py, src/models/architecture.py, data/processed]
-    params: [train, mlflow, seed]
-    outs: [models/best.pt]
+    cmd: python -m src.data.dataset
+    deps:
+      - data/raw
+      - src/data/dataset.py
+    params:
+      - seed
+      - data
+    outs:
+      - data/processed
+  train_baseline:
+    cmd: python -m src.models.train --experiment baseline
+    deps:
+      - data/processed/data.yaml
+      - data/processed/split_manifest.json
+      - src/models/train.py
+      - src/models/architecture.py
+    params:
+      - seed
+      - train
+      - experiments.baseline
+    outs:
+      - models/experiments/yolov8n/best.pt
+  train_advanced:
+    cmd: python -m src.models.train --experiment advanced
+    deps:
+      - data/processed/data.yaml
+      - data/processed/split_manifest.json
+      - src/models/train.py
+      - src/models/architecture.py
+    params:
+      - seed
+      - train
+      - experiments.advanced
+    outs:
+      - models/experiments/yolo11s/best.pt
   evaluate:
-    cmd: python -m src.models.evaluate --params params.yaml
-    deps: [src/models/evaluate.py, models/best.pt, data/processed]
-    params: [evaluate]
-    metrics: [reports/metrics.json]
-  export:
-    cmd: python -m src.models.export_onnx --params params.yaml
-    deps: [src/models/export_onnx.py, models/best.pt]
-    params: [export]
-    outs: [models/best.onnx]
-    metrics: [reports/onnx_benchmark.json]
+    cmd: python -m src.models.evaluate
+    deps:
+      - data/processed/data.yaml
+      - data/processed/split_manifest.json
+      - models/experiments/yolov8n/best.pt
+      - models/experiments/yolo11s/best.pt
+      - src/models/evaluate.py
+    params:
+      - train
+      - experiments
+      - selection
+      - evaluation
+      - inference
+    outs:
+      - models/release
+  benchmark:
+    cmd: >-
+      python scripts/benchmark_latency.py
+      --model models/release/best.onnx
+      --classes models/release/classes.txt
+      --out models/benchmark_local.json
+    deps:
+      - scripts/benchmark_latency.py
+      - backend/app/inference.py
+      - models/release/best.onnx
+      - models/release/classes.txt
+    params:
+      - inference
+    outs:
+      - models/benchmark_local.json
+  gate:
+    cmd: python scripts/check_gate.py
+    deps:
+      - models/release/best.onnx
+      - models/release/metrics.json
+      - models/release/inference_config.json
+      - models/benchmark_local.json
+      - scripts/check_gate.py
+    params:
+      - gate

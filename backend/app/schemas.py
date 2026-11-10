@@ -56,6 +56,7 @@ class ModelMetadata(BaseModel):
     iou_threshold: float
     validation_metrics: Dict[str, float]
     extra: Dict[str, str] = {}
+    benchmark_cpu: Optional[Dict[str, Dict[str, float]]] = None
 
 
 class ErrorResponse(BaseModel):

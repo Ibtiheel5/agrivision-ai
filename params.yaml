@@ -1,30 +1,88 @@
-seed: 42
+﻿seed: 42
 data:
   raw_dir: data/raw
   processed_dir: data/processed
-  datasets:            # sources fusionnées (PlantDoc val/test, PlantSeg train seulement)
-    plantdoc: data/raw/plantdoc
-    plantseg: data/raw/plantseg
-  split: {train: 0.8, val: 0.1, test: 0.1}   # utilisé seulement pour les sources sans split officiel
-  dedup_hash_size: 8          # taille du dHash pour détecter les doublons / quasi-doublons
-  class_merge:                # fusion de classes équivalentes (orthographe)
-    Soyabean: Soybean
+  # PlantDoc split is deterministic; PlantSeg remains train-only.
+  # Counts after exact-deduplication: train 1970, val 348, test 238 images.
+  split:
+    source: plantdoc_officiel
+    ratios: {train: 0.70, val: 0.15, test: 0.15}
+  # PlantSeg is train-only: one box per image from the union of masks, with padding.
+  # Exact duplicates are removed by SHA-256; near-duplicates require separate review.
+  # CC BY-NC-ND 4.0: academic use only; do not redistribute the converted dataset.
+  extra_train:
+    source: plantseg_zenodo_13762907
+    box_from: union_des_masques
+    pad: 0.10
+    max_images_per_class: 150
+    mapping_run: B2_mapping_corrige
+  # 29 classes; Soyabean leaf is merged into Soybean leaf.
+  # These names and their order must match classes.txt exactly.
+  classes:
+    - "Apple Scab Leaf"
+    - "Apple leaf"
+    - "Apple rust leaf"
+    - "Bell_pepper leaf spot"
+    - "Bell_pepper leaf"
+    - "Blueberry leaf"
+    - "Cherry leaf"
+    - "Corn Gray leaf spot"
+    - "Corn leaf blight"
+    - "Corn rust leaf"
+    - "Peach leaf"
+    - "Potato leaf early blight"
+    - "Potato leaf late blight"
+    - "Potato leaf"
+    - "Raspberry leaf"
+    - "Soybean leaf"
+    - "Squash Powdery mildew leaf"
+    - "Strawberry leaf"
+    - "Tomato Early blight leaf"
+    - "Tomato Septoria leaf spot"
+    - "Tomato leaf bacterial spot"
+    - "Tomato leaf late blight"
+    - "Tomato leaf mosaic virus"
+    - "Tomato leaf yellow virus"
+    - "Tomato leaf"
+    - "Tomato mold leaf"
+    - "Tomato two spotted spider mites leaf"
+    - "grape leaf black rot"
+    - "grape leaf"
 train:
-  model: yolo11s.pt
   imgsz: 640
-  epochs: 100
-  batch: 16
-  patience: 20
-  optimizer: auto
-  augment: {mosaic: 1.0, hsv_h: 0.015, hsv_s: 0.7, hsv_v: 0.4, fliplr: 0.5, scale: 0.5}
-mlflow:
-  tracking_uri: http://localhost:5000
-  experiment: agrivision-ia-v4
-evaluate:
+  epochs: 40
+  time_hours: 0.8
+  batch: 32
+  patience: 10
+  optimizer: AdamW
+  lr0: 0.001
+  lrf: 0.01
+  warmup_epochs: 3
+  experiment: agrivision
+  augment: {mosaic: 1.0, mixup: 0.1, hsv_h: 0.01, hsv_s: 0.7, hsv_v: 0.4, fliplr: 0.5, flipud: 0.2, degrees: 10, translate: 0.1, scale: 0.5, close_mosaic: 5, cos_lr: true}
+experiments:
+  baseline:
+    run_name: YOLOv8n_baseline
+    weights: yolov8n.pt
+    output: models/experiments/yolov8n/best.pt
+  advanced:
+    run_name: YOLO11s_advanced
+    weights: yolo11s.pt
+    output: models/experiments/yolo11s/best.pt
+selection:
+  metric: mAP50_95
+evaluation:
+  output_dir: models/release
+inference:
+  conf_min: 0.10
+  accept: 0.40
+  margin_min: 0.0
+  alt_min_score: 0.05
   conf: 0.30
   iou: 0.45
-  gate: {min_map50: 0.50, max_latency_p95_ms: 150}   # porte d'évaluation avant "Production"
+  imgsz: 640
 export:
-  opset: 17
-  simplify: true
   onnx_path: models/best.onnx
+gate:
+  min_map50: 0.50
+  max_latency_ms: 500

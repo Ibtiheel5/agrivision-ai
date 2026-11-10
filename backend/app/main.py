@@ -1,5 +1,6 @@
 """API FastAPI AgriVision IA."""
 
+import json
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -26,6 +27,7 @@ logger = logging.getLogger("agrivision.api")
 DEFAULT_MODEL_DIR = Path(__file__).resolve().parents[2] / "models"
 MODEL_DIR = Path(os.getenv("MODEL_DIR", str(DEFAULT_MODEL_DIR)))
 MODEL_FILE = os.getenv("MODEL_FILE", "best.onnx")
+BENCHMARK_PATH = Path(os.getenv("BENCHMARK_PATH", str(MODEL_DIR / "benchmark_local.json")))
 MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", "10"))
 ALLOWED_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 
@@ -39,6 +41,16 @@ def load_model() -> None:
     except ModelNotLoadedError as exc:
         state["model"], state["error"] = None, str(exc)
         logger.error("Chargement du modèle impossible : %s", exc)
+
+
+def load_benchmark() -> dict:
+    if not BENCHMARK_PATH.exists():
+        return {}
+    try:
+        return json.loads(BENCHMARK_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("Benchmark local illisible (%s) : %s", BENCHMARK_PATH, exc)
+        return {}
 
 
 @asynccontextmanager
@@ -99,6 +111,21 @@ async def health():
 async def model_metadata():
     m = get_model()
     md = m.metadata
+    benchmark = md.get("benchmark_cpu")
+    if not benchmark:
+        local_benchmark = load_benchmark()
+        p50 = local_benchmark.get("p50_ms")
+        p95 = local_benchmark.get("p95_ms")
+        if p50 is not None and p95 is not None:
+            model_path = MODEL_DIR / MODEL_FILE
+            benchmark = {
+                "onnx_fp32_cpu": {
+                    "p50_ms": float(p50),
+                    "p95_ms": float(p95),
+                    "fps": 1000 / float(p50) if float(p50) > 0 else 0.0,
+                    "size_mb": model_path.stat().st_size / (1024 * 1024) if model_path.exists() else 0.0,
+                }
+            }
     return ModelMetadata(
         name=md.get("name", "AgriVision IA"),
         architecture=md.get("architecture", "YOLO"),
@@ -110,6 +137,7 @@ async def model_metadata():
         iou_threshold=m.iou_default,
         validation_metrics=md.get("validation_metrics", {}),
         extra={k: str(v) for k, v in md.get("extra", {}).items()},
+        benchmark_cpu=benchmark,
     )
 
 

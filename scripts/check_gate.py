@@ -1,12 +1,10 @@
-"""Porte d'évaluation : vérifie le modèle de models/ avant de le déclarer « production ».
+"""Gate the models/release artifact before model registration.
 
-Lit params.yaml (gate), models/metrics.json et models/inference_config.json.
-La latence vient de models/benchmark_local.json si elle existe (mesure sur la machine
-cible), sinon de metrics.json (mesure du notebook). La mAP50 vient de la VALIDATION,
-jamais du test. Code de sortie 1 si une condition échoue.
+Validation mAP50 is compared with its configured minimum; p95 latency is measured locally.
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -25,14 +23,11 @@ def latency_p95(metrics: dict) -> tuple:
 
 def main() -> int:
     gate = yaml.safe_load(Path("params.yaml").read_text(encoding="utf-8"))["gate"]
-    metrics = json.loads(Path("models/metrics.json").read_text(encoding="utf-8"))
-    config = json.loads(
-        Path("models/inference_config.json").read_text(encoding="utf-8")
-    )
+    release_dir = Path(os.getenv("MODEL_RELEASE_DIR", "models/release"))
+    metrics = json.loads((release_dir / "metrics.json").read_text(encoding="utf-8"))
+    config = json.loads((release_dir / "inference_config.json").read_text(encoding="utf-8"))
     run = config["model"]
-    row = next(
-        (r for r in metrics.get("comparaison_val", []) if r.get("run") == run), None
-    )
+    row = next((r for r in metrics.get("comparaison_val", []) if r.get("run") == run), None)
     if row is None:
         print(f"ECHEC : run '{run}' absent de metrics.json (comparaison_val)")
         return 1
@@ -44,12 +39,8 @@ def main() -> int:
     ok_lat = p95 <= gate["max_latency_ms"]
     verdict = {True: "OK", False: "ECHEC"}
     print(f"Modèle : {run}")
-    print(
-        f"mAP50 validation : {row['mAP50']:.3f} (min {gate['min_map50']}) -> {verdict[ok_map]}"
-    )
-    print(
-        f"Latence p95 : {p95:.1f} ms (max {gate['max_latency_ms']}) -> {verdict[ok_lat]}"
-    )
+    print(f"mAP50 validation : {row['mAP50']:.3f} (min {gate['min_map50']}) -> {verdict[ok_map]}")
+    print(f"Latence p95 : {p95:.1f} ms (max {gate['max_latency_ms']}) -> {verdict[ok_lat]}")
     print(f"Source de la latence : {source}")
     return 0 if (ok_map and ok_lat) else 1
 

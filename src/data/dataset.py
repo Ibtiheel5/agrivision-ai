@@ -1,148 +1,287 @@
-"""Préparation des données : fusion PlantDoc + PlantSeg (format YOLO), dédoublonnage, splits.
+"""Validate and reproducibly split an annotated YOLO image dataset."""
 
-Règles anti-fuite :
-  * PlantDoc garde ses splits officiels (train/test) ; il fournit val + test.
-  * PlantSeg est ajouté au TRAIN uniquement.
-  * Toute image du train dont le hash perceptuel (dHash) est identique à une image val/test est retirée.
-  * Aucune augmentation ici : elle est faite à l'entraînement, sur train seulement (Ultralytics).
+from __future__ import annotations
 
-Attendu en entrée (adapter `load_*` à la structure réelle des datasets Kaggle) :
-  data/raw/<source>/{train,valid,test}/{images,labels}  + data.yaml (liste `names`)
-"""
-import argparse
 import hashlib
 import json
-import logging
 import random
 import shutil
+from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any
 
 import yaml
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
-logger = logging.getLogger("dataset")
-IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-
-
-def dhash(path: Path, size: int = 8) -> str:
-    with Image.open(path) as im:
-        g = im.convert("L").resize((size + 1, size), Image.LANCZOS)
-    px = list(g.getdata())
-    bits = []
-    for r in range(size):
-        row = px[r * (size + 1) : (r + 1) * (size + 1)]
-        bits += [row[c] > row[c + 1] for c in range(size)]
-    return hashlib.md5("".join("1" if b else "0" for b in bits).encode()).hexdigest()
+IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
 
-def is_valid_image(path: Path) -> bool:
-    try:
-        with Image.open(path) as im:
-            im.verify()
-        return True
-    except Exception:  # noqa: BLE001
-        return False
+class DatasetError(ValueError):
+    """Raised when the raw dataset cannot safely be prepared."""
 
 
-def read_names(src: Path) -> List[str]:
-    cfg = yaml.safe_load((src / "data.yaml").read_text(encoding="utf-8"))
-    names = cfg["names"]
-    return [names[k] for k in sorted(names)] if isinstance(names, dict) else list(names)
+def file_hash(path: Path) -> str:
+    """Return a content hash used to remove exact duplicate images."""
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
-def collect(src: Path, split: str) -> List[Tuple[Path, Path]]:
-    imgs = [p for p in (src / split / "images").glob("*") if p.suffix.lower() in IMG_EXT]
-    pairs = []
-    for p in sorted(imgs):
-        lab = src / split / "labels" / f"{p.stem}.txt"
-        if lab.exists() and is_valid_image(p):
-            pairs.append((p, lab))
-        else:
-            logger.warning("Ignoré (image corrompue ou sans label) : %s", p)
-    return pairs
-
-
-def remap_label(lab: Path, id_map: Dict[int, int]) -> str:
-    out = []
-    for ln in lab.read_text().splitlines():
-        parts = ln.split()
-        if len(parts) >= 5 and int(parts[0]) in id_map:
-            out.append(" ".join([str(id_map[int(parts[0])])] + parts[1:5]))  # boîtes seulement
-    return "\n".join(out)
-
-
-def build(params: dict) -> None:
-    d = params["data"]
-    random.seed(params["seed"])
-    out = Path(d["processed_dir"])
-    if out.exists():
-        shutil.rmtree(out)
-    merge = d.get("class_merge", {})
-    sources = {k: Path(v) for k, v in d["datasets"].items()}
-
-    # 1) vocabulaire de classes global (après fusion d'orthographes)
-    vocab: List[str] = []
-    local_maps: Dict[str, Dict[int, int]] = {}
-    for name, src in sources.items():
-        m = {}
-        for i, cls in enumerate(read_names(src)):
-            cls = merge.get(cls, cls)
-            if cls not in vocab:
-                vocab.append(cls)
-            m[i] = vocab.index(cls)
-        local_maps[name] = m
-
-    # 2) PlantDoc -> val/test ; PlantSeg -> train ; PlantDoc train -> train
-    plan = {"train": [], "val": [], "test": []}
-    for name, src in sources.items():
-        for split in ("train", "valid", "val", "test"):
-            if not (src / split).exists():
-                continue
-            target = {"valid": "val"}.get(split, split)
-            if name == "plantseg":
-                target = "train"  # PlantSeg uniquement dans le train
-            plan[target] += [(p, l, name) for p, l in collect(src, split)]
-
-    # 3) anti-fuite : retirer du train tout doublon (hash) d'une image val/test
-    held = {dhash(p, d["dedup_hash_size"]) for s in ("val", "test") for p, _, _ in plan[s]}
-    kept, removed, seen = [], 0, set()
-    for p, l, n in plan["train"]:
-        h = dhash(p, d["dedup_hash_size"])
-        if h in held or h in seen:
-            removed += 1
+def _validate_label(path: Path, num_classes: int) -> list[int]:
+    """Validate YOLO detection labels and return class ids in the image."""
+    class_ids: list[int] = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        fields = line.split()
+        if not fields:
             continue
-        seen.add(h)
-        kept.append((p, l, n))
-    plan["train"] = kept
-    logger.info("Doublons/quasi-doublons retirés du train : %d", removed)
+        if len(fields) != 5:
+            raise DatasetError(f"{path}:{line_number}: expected 5 YOLO fields, got {len(fields)}")
+        try:
+            class_id = int(fields[0])
+            coords = [float(value) for value in fields[1:]]
+        except ValueError as exc:
+            raise DatasetError(f"{path}:{line_number}: labels must be numeric") from exc
+        if class_id < 0 or class_id >= num_classes:
+            raise DatasetError(
+                f"{path}:{line_number}: class id {class_id} is outside 0..{num_classes - 1}"
+            )
+        if any(value < 0 or value > 1 for value in coords):
+            raise DatasetError(f"{path}:{line_number}: normalized box values must be in [0, 1]")
+        if coords[2] <= 0 or coords[3] <= 0:
+            raise DatasetError(f"{path}:{line_number}: box width and height must be positive")
+        class_ids.append(class_id)
+    return class_ids
 
-    # 4) écriture
-    stats = {"classes": len(vocab), "removed_duplicates": removed}
-    for split, items in plan.items():
-        (out / "images" / split).mkdir(parents=True)
-        (out / "labels" / split).mkdir(parents=True)
-        for p, l, n in items:
-            stem = f"{n}_{p.stem}"
-            shutil.copy2(p, out / "images" / split / f"{stem}{p.suffix.lower()}")
-            (out / "labels" / split / f"{stem}.txt").write_text(remap_label(l, local_maps[n]))
-        stats[split] = len(items)
-    (out / "data.yaml").write_text(
-        yaml.safe_dump(
-            {"path": str(out.resolve()), "train": "images/train", "val": "images/val",
-             "test": "images/test", "names": {i: c for i, c in enumerate(vocab)}},
-            allow_unicode=True,
-        )  # fmt: skip
+
+def _image_class(class_ids: list[int]) -> int | None:
+    """Choose the most frequent class as a deterministic stratification key."""
+    if not class_ids:
+        return None
+    counts = Counter(class_ids)
+    return min(counts, key=lambda class_id: (-counts[class_id], class_id))
+
+
+def _split_by_class(
+    records: list[dict[str, Any]], ratios: dict[str, float], seed: int
+) -> dict[str, list[dict[str, Any]]]:
+    buckets: dict[int | None, list[dict[str, Any]]] = defaultdict(list)
+    for record in records:
+        buckets[record["stratify_class"]].append(record)
+
+    splits = {name: [] for name in ("train", "val", "test")}
+    for class_id in sorted(buckets, key=lambda item: (-1 if item is None else item)):
+        bucket = buckets[class_id]
+        random.Random(f"{seed}:{class_id}").shuffle(bucket)
+        n = len(bucket)
+        exact = {name: n * ratios[name] for name in ("train", "val", "test")}
+        counts = {name: int(exact[name]) for name in exact}
+        remainder = n - sum(counts.values())
+        for name in sorted(exact, key=lambda key: (-(exact[key] - counts[key]), key))[:remainder]:
+            counts[name] += 1
+        n_train, n_val, n_test = counts["train"], counts["val"], counts["test"]
+        if n:
+            n_train = max(1, n_train)
+        # Keep every split represented for classes with enough images.
+        if n >= 3 and ratios["val"] > 0 and n_val == 0:
+            n_val, n_train = 1, n_train - 1
+        if n >= 3 and ratios["test"] > 0 and n_test == 0:
+            n_test, n_train = 1, n_train - 1
+        if n == 2 and ratios["val"] > 0 and n_val == 0:
+            n_val, n_train = 1, n_train - 1
+        splits["train"].extend(bucket[:n_train])
+        splits["val"].extend(bucket[n_train : n_train + n_val])
+        splits["test"].extend(bucket[n_train + n_val : n_train + n_val + n_test])
+    return splits
+
+
+def _cap_extra_train(
+    records: list[dict[str, Any]], cap: int | None, seed: int
+) -> tuple[list, dict]:
+    if cap is None or cap <= 0:
+        return records, {}
+    by_class: dict[int | None, list[dict[str, Any]]] = defaultdict(list)
+    for record in records:
+        by_class[record["stratify_class"]].append(record)
+    kept: list[dict[str, Any]] = []
+    removed: dict[str, int] = {}
+    for class_id, bucket in by_class.items():
+        random.Random(f"plantseg:{seed}:{class_id}").shuffle(bucket)
+        kept.extend(bucket[:cap])
+        if len(bucket) > cap:
+            removed[str(class_id)] = len(bucket) - cap
+    return kept, removed
+
+
+def _load_config(params_path: str | Path) -> tuple[dict, Path, Path, dict[str, float]]:
+    with Path(params_path).open(encoding="utf-8") as stream:
+        params = yaml.safe_load(stream)
+    try:
+        raw = Path(params["data"]["raw_dir"])
+        out = Path(params["data"]["processed_dir"])
+        classes = params["data"]["classes"]
+        configured = params["data"]["split"]["ratios"]
+        ratios = {name: float(configured[name]) for name in ("train", "val", "test")}
+        seed = int(params["seed"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise DatasetError(
+            "params.yaml is missing dataset paths, classes, split ratios, or seed"
+        ) from exc
+    if not classes or len(set(classes)) != len(classes):
+        raise DatasetError("data.classes must be a non-empty list of unique class names")
+    if any(value < 0 for value in ratios.values()) or abs(sum(ratios.values()) - 1.0) > 1e-8:
+        raise DatasetError("split ratios train/val/test must be non-negative and sum to 1")
+    if ratios["train"] <= 0:
+        raise DatasetError("the training split ratio must be greater than zero")
+    return params, raw, out, {**ratios, "seed": seed}
+
+
+def prepare(params_path: str | Path = "params.yaml") -> dict:
+    """Validate raw YOLO files, deduplicate, stratify, and emit a dataset manifest."""
+    params, raw, out, split_config = _load_config(params_path)
+    seen: dict[str, dict[str, Any]] = {}
+    duplicates: list[dict[str, str]] = []
+    primary_records: list[dict[str, Any]] = []
+    extra_train_records: list[dict[str, Any]] = []
+    class_names = params["data"]["classes"]
+    primary_root = raw / "plantdoc"
+    extra_root = raw / "plantseg"
+    if primary_root.is_dir():
+        sources = [("plantdoc", primary_root, primary_records)]
+        if (extra_root / "images").is_dir():
+            sources.append(("plantseg_train_only", extra_root, extra_train_records))
+    elif (raw / "images").is_dir():
+        if params["data"].get("extra_train"):
+            raise DatasetError(
+                "PlantSeg is configured as train-only. Use data/raw/plantdoc/{images,labels} "
+                "and data/raw/plantseg/{images,labels}; a mixed flat folder cannot be split safely."
+            )
+        sources = [("primary", raw, primary_records)]
+    else:
+        raise DatasetError(
+            "Expected data/raw/plantdoc/{images,labels} (and optional train-only "
+            "data/raw/plantseg/{images,labels})"
+        )
+
+    raw_image_count = 0
+    for source_name, source_root, destination in sources:
+        image_dir, label_dir = source_root / "images", source_root / "labels"
+        if not image_dir.is_dir() or not label_dir.is_dir():
+            raise DatasetError(f"Expected YOLO folders {image_dir} and {label_dir}")
+        source_images = sorted(
+            path for path in image_dir.iterdir() if path.suffix.lower() in IMAGE_SUFFIXES
+        )
+        raw_image_count += len(source_images)
+        for image_path in source_images:
+            label_path = label_dir / f"{image_path.stem}.txt"
+            if not label_path.is_file():
+                raise DatasetError(f"Missing YOLO annotation for {image_path.name}: {label_path}")
+            try:
+                with Image.open(image_path) as image:
+                    image.verify()
+            except (OSError, UnidentifiedImageError) as exc:
+                raise DatasetError(f"Corrupt or unsupported image: {image_path}") from exc
+            class_ids = _validate_label(label_path, len(class_names))
+            image_digest = file_hash(image_path)
+            normalized_labels = "\n".join(
+                line.strip()
+                for line in label_path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            )
+            if image_digest in seen:
+                prior = seen[image_digest]
+                if (
+                    prior["normalized_labels"] != normalized_labels
+                    and source_name != "plantseg_train_only"
+                ):
+                    raise DatasetError(
+                        f"Exact duplicate image has conflicting annotations: "
+                        f"{prior['image'].name} and {image_path.name}"
+                    )
+                duplicates.append(
+                    {
+                        "kept": prior["image"].name,
+                        "duplicate": image_path.name,
+                        "source": source_name,
+                    }
+                )
+                continue
+            record = {
+                "image": image_path,
+                "label": label_path,
+                "sha256": image_digest,
+                "class_ids": class_ids,
+                "stratify_class": _image_class(class_ids),
+                "normalized_labels": normalized_labels,
+                "source": source_name,
+                "output_name": (
+                    f"{source_name}__{image_path.stem}__{image_digest[:10]}"
+                    f"{image_path.suffix.lower()}"
+                ),
+            }
+            seen[image_digest] = record
+            destination.append(record)
+
+    split_ratios = {key: split_config[key] for key in ("train", "val", "test")}
+    if not primary_records:
+        raise DatasetError("The primary PlantDoc dataset contains no valid images")
+    extra_config = params["data"].get("extra_train") or {}
+    extra_train_records, capped_extra = _cap_extra_train(
+        extra_train_records,
+        extra_config.get("max_images_per_class"),
+        split_config["seed"],
     )
-    Path("models").mkdir(exist_ok=True)
-    Path("models/classes.txt").write_text("\n".join(vocab) + "\n", encoding="utf-8")
-    Path("reports").mkdir(exist_ok=True)
-    Path("reports/data_stats.json").write_text(json.dumps(stats, indent=2))
-    logger.info("Données prêtes : %s", stats)
+    splits = _split_by_class(primary_records, split_ratios, split_config["seed"])
+    splits["train"].extend(extra_train_records)
+
+    # Clear only generated split contents so stale files cannot leak across reruns.
+    for split_name in splits:
+        split_root = out / split_name
+        for child in (split_root / "images", split_root / "labels"):
+            if child.exists():
+                shutil.rmtree(child)
+            child.mkdir(parents=True, exist_ok=True)
+        for record in splits[split_name]:
+            target_image = split_root / "images" / record["output_name"]
+            target_label = split_root / "labels" / f"{Path(record['output_name']).stem}.txt"
+            shutil.copy2(record["image"], target_image)
+            shutil.copy2(record["label"], target_label)
+
+    data_yaml = {
+        "path": str(out.resolve()),
+        "train": "train/images",
+        "val": "val/images",
+        "test": "test/images",
+        "names": {index: name for index, name in enumerate(class_names)},
+    }
+    with (out / "data.yaml").open("w", encoding="utf-8") as stream:
+        yaml.safe_dump(data_yaml, stream, sort_keys=False, allow_unicode=True)
+
+    manifest = {
+        "seed": split_config["seed"],
+        "ratios": split_ratios,
+        "raw_images": raw_image_count,
+        "unique_images": sum(map(len, splits.values())),
+        "train_only_extra_images": len(extra_train_records),
+        "train_only_extra_images_removed_by_class_cap": capped_extra,
+        "exact_duplicates_removed": duplicates,
+        "splits": {},
+    }
+    for split_name, split_records in splits.items():
+        counts = Counter(class_id for record in split_records for class_id in record["class_ids"])
+        manifest["splits"][split_name] = {
+            "images": [record["output_name"] for record in split_records],
+            "image_count": len(split_records),
+            "annotation_counts_by_class": {
+                class_names[class_id]: counts.get(class_id, 0)
+                for class_id in range(len(class_names))
+            },
+        }
+    with (out / "split_manifest.json").open("w", encoding="utf-8") as stream:
+        json.dump(manifest, stream, ensure_ascii=False, indent=2)
+    return manifest
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--params", default="params.yaml")
-    build(yaml.safe_load(Path(ap.parse_args().params).read_text()))
+    prepare()

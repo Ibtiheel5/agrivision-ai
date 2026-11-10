@@ -9,7 +9,9 @@ from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 
+from .metrics import PREDICTIONS, setup_metrics
 from .inference import InvalidImageError, ModelNotLoadedError, YoloOnnx
+from .routers import advice, risk_map, weather
 from .schemas import (
     ErrorResponse,
     HealthResponse,
@@ -41,7 +43,8 @@ def load_model() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    load_model()  # chargé une seule fois au démarrage
+    risk_map.init_db()
+    load_model()
     yield
 
 
@@ -52,6 +55,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_methods=["*"], allow_headers=["*"])
+
+setup_metrics(app)
+app.include_router(advice.router)
+app.include_router(risk_map.router)
+app.include_router(weather.router)
 
 
 def get_model() -> YoloOnnx:
@@ -118,7 +126,9 @@ async def predict(
 ):
     m = get_model()
     img = await read_image(file, m)
-    return await run_in_threadpool(m.predict, img, conf, iou)
+    result = await run_in_threadpool(m.predict, img, conf, iou)
+    PREDICTIONS.labels("ok" if result["detections"] else "aucune_detection").inc()
+    return result
 
 
 @app.post(

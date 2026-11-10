@@ -5,8 +5,10 @@ services:
       MODEL_DIR: /models
       CORS_ORIGINS: "*"
       MAX_UPLOAD_MB: "10"
+      MLFLOW_URL: http://mlflow:5000
     volumes:
       - ./models:/models:ro
+      - ./data:/app/data
     ports: ["8000:8000"]
     restart: unless-stopped
 
@@ -15,6 +17,13 @@ services:
     depends_on:
       backend: { condition: service_healthy }
     ports: ["8090:80"]               # application : http://localhost:8080
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes: ["./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    depends_on: [backend]
     restart: unless-stopped
 
   mlflow:

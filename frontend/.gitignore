@@ -1,3 +1,10 @@
 node_modules
 dist
 .env
+android/.gradle
+android/local.properties
+android/**/build
+ios/App/Pods
+ios/App/build
+ios/App/DerivedData
+ios/App/*.xcworkspace/xcuserdata

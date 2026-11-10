@@ -11,7 +11,7 @@ jobs:
       - run: flake8 --max-line-length 120 backend/app backend/tests src/data tests
       - run: black --check -l 120 backend/app backend/tests
       - name: Tests API (mini-modèle ONNX factice, aucun dataset requis)
-        run: cd backend && python -m pytest -q
+        run: cd backend && PYTHONPATH=.. python -m pytest -q
       - name: Test préparation des données (jeu synthétique)
         run: python -m pytest tests -q
   frontend:

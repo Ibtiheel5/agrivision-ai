@@ -1,0 +1,13 @@
+{
+  "name": "agrivision-ia",
+  "short_name": "agrivision-ia",
+  "description": "Détection de maladies des feuilles par IA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef6f1",
+  "theme_color": "#2b6a4d",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

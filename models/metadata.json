@@ -1,0 +1,14 @@
+{
+  "name": "AgriVision v4 SGD 800",
+  "architecture": "YOLO11s",
+  "version": "v4-sgd-800",
+  "conf_threshold": 0.25,
+  "iou_threshold": 0.45,
+  "validation_metrics": {},
+  "extra": {
+    "training_run": "AgriVision_v4_sgd_800",
+    "input_size": "800",
+    "test_map50": "0.6602818298351408",
+    "test_map50_95": "0.5119164344719466"
+  }
+}

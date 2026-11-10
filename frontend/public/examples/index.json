@@ -1,1 +1,14 @@
-[]
+[
+ {
+  "file": "exemple1.jpg",
+  "title": "sampleLeafDamaged"
+ },
+ {
+  "file": "exemple2.jpg",
+  "title": "sampleLeafSpots"
+ },
+ {
+  "file": "exemple3.jpg",
+  "title": "samplePumpkinHarvest"
+ }
+]

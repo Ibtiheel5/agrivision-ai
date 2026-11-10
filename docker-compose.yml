@@ -1,17 +1,28 @@
 services:
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:latest
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow/mlflow.db --default-artifact-root /mlflow/artifacts
-    ports: ["5000:5000"]
-    volumes: ["./mlflow:/mlflow"]
   backend:
     build: ./backend
-    ports: ["8000:8000"]
     environment:
-      MODEL_PATH: /models/best.onnx
-      MODEL_VERSION: "1"
-    volumes: ["./models:/models:ro"]
+      MODEL_DIR: /models
+      CORS_ORIGINS: "*"
+      MAX_UPLOAD_MB: "10"
+    volumes:
+      - ./models:/models:ro
+    ports: ["8000:8000"]
+    restart: unless-stopped
+
   frontend:
     build: ./frontend
-    ports: ["3000:80"]
-    depends_on: [backend]
+    depends_on:
+      backend: { condition: service_healthy }
+    ports: ["8090:80"]               # application : http://localhost:8080
+    restart: unless-stopped
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.17.0
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////mlflow/mlflow.db --serve-artifacts --default-artifact-root mlflow-artifacts:/ --artifacts-destination /mlflow/artifacts
+    volumes: [mlflow-data:/mlflow]
+    ports: ["5000:5000"]
+    restart: unless-stopped
+
+volumes:
+  mlflow-data:

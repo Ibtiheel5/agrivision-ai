@@ -1,43 +1,37 @@
-export const API_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
+import axios from "axios";
 
-// On demande toujours les détections dès 5 % de confiance ; le curseur filtre ensuite côté client,
-// ce qui le rend instantané sans nouvelle requête.
-export const API_MIN_CONF = 0.05;
+const http = axios.create({ baseURL: import.meta.env.VITE_API_URL || "/api", timeout: 30000 });
 
-async function parse(res) {
-  if (!res.ok) {
-    let detail = res.statusText;
-    try {
-      detail = (await res.json()).detail ?? detail;
-    } catch {
-      /* corps non JSON */
-    }
-    const err = new Error(detail);
-    err.status = res.status;
-    throw err;
-  }
-  return res.json();
+/** Réduit l'image (max 1280 px) pour économiser la data mobile avant l'envoi. */
+export async function compressImage(file, maxSide = 1280, quality = 0.88) {
+  if (!file.type.startsWith("image/")) return file;
+  const bmp = await createImageBitmap(file);
+  const r = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+  if (r === 1 && file.size < 800_000) return file;
+  const c = document.createElement("canvas");
+  c.width = Math.round(bmp.width * r);
+  c.height = Math.round(bmp.height * r);
+  c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+  const blob = await new Promise((res) => c.toBlob(res, "image/jpeg", quality));
+  return new File([blob], "photo.jpg", { type: "image/jpeg" });
 }
 
-/** Envoie une image (File ou Blob) à /predict. Ajoute `client_ms` (aller-retour mesuré dans le navigateur). */
-export async function predict(blob, { conf = API_MIN_CONF, iou = 0.45, signal } = {}) {
+/** Envoie l'image à /predict ; renvoie { data, clientLatencyMs }. */
+export async function predict(file, { conf, visualize = false } = {}) {
   const form = new FormData();
-  form.append("file", blob, blob.name ?? "frame.jpg");
+  form.append("file", file);
   const t0 = performance.now();
-  const res = await fetch(`${API_URL}/predict?conf=${conf}&iou=${iou}`, { method: "POST", body: form, signal });
-  const data = await parse(res);
-  return { ...data, client_ms: performance.now() - t0 };
+  const { data } = await http.post(visualize ? "/predict/visualize" : "/predict", form, {
+    params: conf ? { conf } : undefined,
+  });
+  return { data, clientLatencyMs: Math.round(performance.now() - t0) };
 }
 
-export const getHealth = () => fetch(`${API_URL}/health`).then(parse);
-export const getMetadata = () => fetch(`${API_URL}/model/metadata`).then(parse);
+export const getHealth = () => http.get("/health").then((r) => r.data);
+export const getMetadata = () => http.get("/model/metadata").then((r) => r.data);
 
-/** Message lisible pour l'utilisateur à partir d'une erreur réseau/HTTP. */
-export function explain(err) {
-  if (err?.name === "AbortError") return null;
-  if (err?.status === 503) return "Le modèle n'est pas chargé côté serveur (503).";
-  if (err?.status === 400) return "Le serveur a refusé le fichier : ce n'est pas une image valide.";
-  if (err?.status === 413) return "Image trop volumineuse pour le serveur.";
-  if (err instanceof TypeError) return `API injoignable (${API_URL}). Le backend est-il démarré ?`;
-  return err?.message ?? "Erreur inconnue";
+export function errorMessage(err) {
+  if (err.response) return `${err.response.status} — ${err.response.data?.detail ?? "erreur serveur"}`;
+  if (err.code === "ECONNABORTED") return "Délai dépassé";
+  return "Serveur injoignable";
 }

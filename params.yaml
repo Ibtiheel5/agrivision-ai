@@ -1,67 +1,30 @@
-﻿seed: 42
+seed: 42
 data:
   raw_dir: data/raw
   processed_dir: data/processed
-  # PlantDoc : val/test = PlantDoc uniquement (jamais de PlantSeg dans val ou test).
-  # Effectifs aprÃ¨s nettoyage des doublons exacts : train 1970, val 348, test 238 images.
-  split: {source: plantdoc_officiel, val_fraction_of_train: 0.15}
-  # PlantSeg ajoutÃ© au TRAIN uniquement : une boÃ®te par image = zone malade (union des masques) + marge.
-  # Doublons exacts (md5) et quasi-doublons (hash perceptuel) avec val/test Ã©cartÃ©s.
-  # Licence CC BY-NC-ND 4.0 : usage acadÃ©mique, ne pas redistribuer le jeu converti.
-  extra_train:
-    source: plantseg_zenodo_13762907
-    box_from: union_des_masques
-    pad: 0.10
-    max_images_per_class: 150
-    mapping_run: B2_mapping_corrige
-  # 29 classes (PlantDoc, 'Soyabean leaf' fusionnÃ©e dans 'Soybean leaf') : noms EXACTS et ORDRE EXACT
-  # de classes.txt produit par le notebook (l'id de classe = la position). En cas de doute, classes.txt fait foi.
-  classes:
-    - "Apple Scab Leaf"
-    - "Apple leaf"
-    - "Apple rust leaf"
-    - "Bell_pepper leaf spot"
-    - "Bell_pepper leaf"
-    - "Blueberry leaf"
-    - "Cherry leaf"
-    - "Corn Gray leaf spot"
-    - "Corn leaf blight"
-    - "Corn rust leaf"
-    - "Peach leaf"
-    - "Potato leaf early blight"
-    - "Potato leaf late blight"
-    - "Potato leaf"
-    - "Raspberry leaf"
-    - "Soybean leaf"
-    - "Squash Powdery mildew leaf"
-    - "Strawberry leaf"
-    - "Tomato Early blight leaf"
-    - "Tomato Septoria leaf spot"
-    - "Tomato leaf bacterial spot"
-    - "Tomato leaf late blight"
-    - "Tomato leaf mosaic virus"
-    - "Tomato leaf yellow virus"
-    - "Tomato leaf"
-    - "Tomato mold leaf"
-    - "Tomato two spotted spider mites leaf"
-    - "grape leaf black rot"
-    - "grape leaf"
+  datasets:            # sources fusionnées (PlantDoc val/test, PlantSeg train seulement)
+    plantdoc: data/raw/plantdoc
+    plantseg: data/raw/plantseg
+  split: {train: 0.8, val: 0.1, test: 0.1}   # utilisé seulement pour les sources sans split officiel
+  dedup_hash_size: 8          # taille du dHash pour détecter les doublons / quasi-doublons
+  class_merge:                # fusion de classes équivalentes (orthographe)
+    Soyabean: Soybean
 train:
-  model: yolo11s.pt        # meilleur run (validation) : B2_mapping_corrige
+  model: yolo11s.pt
   imgsz: 640
-  epochs: 40               # plafond ; l'entraÃ®nement est aussi limitÃ© par time_hours
-  time_hours: 0.8
-  batch: 32
-  patience: 10
-  experiment: agrivision
-  augment: {mosaic: 1.0, mixup: 0.1, hsv_h: 0.01, hsv_s: 0.7, hsv_v: 0.4, fliplr: 0.5, flipud: 0.2, degrees: 10, translate: 0.1, scale: 0.5, close_mosaic: 5, cos_lr: true}
-inference:
-  conf: 0.30               # seuil retenu sur la validation (F1 quasi plat de 0.15 Ã  0.40 ; 0.25 possible pour dÃ©tecter plus)
+  epochs: 100
+  batch: 16
+  patience: 20
+  optimizer: auto
+  augment: {mosaic: 1.0, hsv_h: 0.015, hsv_s: 0.7, hsv_v: 0.4, fliplr: 0.5, scale: 0.5}
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment: agrivision-ia-v4
+evaluate:
+  conf: 0.30
   iou: 0.45
-  imgsz: 640
+  gate: {min_map50: 0.50, max_latency_p95_ms: 150}   # porte d'évaluation avant "Production"
 export:
+  opset: 17
+  simplify: true
   onnx_path: models/best.onnx
-  # int8_path: models/best_int8.onnx   # non rÃ©gÃ©nÃ©rÃ© pour le modÃ¨le YOLO11s (l'INT8 de l'ancien modÃ¨le Ã©tait plus lent)
-gate:
-  min_map50: 0.50          # Ã©valuÃ© sur la VALIDATION, jamais sur le test (PyTorch B2 : 0.641 ; ONNX Ã  re-mesurer)
-  max_latency_ms: 500      # TODO Ã  re-mesurer : ancien modÃ¨le p95 61 ms ; YOLO11s p95 187 ms sur CPU Kaggle (Ultralytics, prÃ©/post-traitement inclus)

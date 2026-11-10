@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest==8.3.4
+httpx==0.28.1
+onnx>=1.16
+flake8==7.1.1
+black==24.10.0

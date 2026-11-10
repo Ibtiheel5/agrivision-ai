@@ -1,4 +1,4 @@
-name: CI
+name: ci-tests
 on: [push, pull_request]
 jobs:
   backend:
@@ -6,15 +6,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: {python-version: "3.11", cache: pip}
-      - run: pip install -r backend/requirements.txt pytest flake8 black
-      - run: flake8 backend src --max-line-length 100
-      - run: black --check backend src
-      - run: pytest backend/tests
+        with: { python-version: "3.11", cache: pip }
+      - run: pip install -r backend/requirements-dev.txt pyyaml
+      - run: flake8 --max-line-length 120 backend/app backend/tests src/data tests
+      - run: black --check -l 120 backend/app backend/tests
+      - name: Tests API (mini-modèle ONNX factice, aucun dataset requis)
+        run: cd backend && python -m pytest -q
+      - name: Test préparation des données (jeu synthétique)
+        run: python -m pytest tests -q
   frontend:
     runs-on: ubuntu-latest
+    defaults: { run: { working-directory: frontend } }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: 20}
-      - run: cd frontend && npm install && npm run build
+        with: { node-version: 22, cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

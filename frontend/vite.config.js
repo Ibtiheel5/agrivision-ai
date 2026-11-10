@@ -1,8 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  server: { port: 5173 },
+  plugins: [react()],
+  server: {
+    host: true,
+    port: 5173,
+    allowedHosts: ["salvador-rush-tested-contractor.trycloudflare.com"],
+    proxy: { "/api": { target: "http://localhost:8000", rewrite: (p) => p.replace(/^\/api/, "") } },
+  },
+  test: { environment: "jsdom", globals: true },
 });

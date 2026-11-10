@@ -1,0 +1,7 @@
+ultralytics>=8.3.0
+mlflow>=3.17,<4
+dvc>=3.50
+onnx>=1.16
+onnxruntime>=1.18
+pyyaml
+pillow

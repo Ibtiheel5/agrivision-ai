@@ -1,12 +1,9 @@
-from PIL import Image, ImageDraw
+"""Visualisation des détections (équivalent de gradcam.py pour l'Axe 3 : détection)."""
+import base64
+import io
+
+from PIL import Image
 
 
-def draw_boxes(image: Image.Image, detections):
-    # detections : liste d'objets avec label, confidence et box [x1, y1, x2, y2]
-    img = image.convert("RGB")
-    d = ImageDraw.Draw(img)
-    for det in detections:
-        x1, y1, x2, y2 = det.box
-        d.rectangle([x1, y1, x2, y2], outline=(47, 125, 90), width=3)
-        d.text((x1 + 3, y1 + 3), f"{det.label} {det.confidence:.2f}", fill=(255, 255, 255))
-    return img
+def decode_annotated(b64: str) -> Image.Image:
+    return Image.open(io.BytesIO(base64.b64decode(b64)))

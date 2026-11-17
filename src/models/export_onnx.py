@@ -2,6 +2,7 @@
 
 Sorties : models/best.onnx, reports/onnx_benchmark.json
 """
+
 import argparse
 import json
 import time
@@ -11,6 +12,8 @@ import numpy as np
 import onnxruntime as ort
 import yaml
 from ultralytics import YOLO
+
+from scripts.check_gate import main as check_gate
 
 
 def bench(fn, n=50, warm=5):
@@ -55,14 +58,8 @@ def main(params_path: str) -> None:
     Path("reports/onnx_benchmark.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
 
-    # porte d'évaluation avant passage en Production (Registry MLflow)
-    gate, metrics_file = P["evaluate"]["gate"], Path("reports/metrics.json")
-    if metrics_file.exists():
-        m = json.loads(metrics_file.read_text())["val"]["mAP50"]
-        ok = m >= gate["min_map50"] and report["onnx_cpu"]["p95_ms"] <= gate["max_latency_p95_ms"]
-        p95 = report["onnx_cpu"]["p95_ms"]
-        print(f"Porte d'évaluation : mAP50={m:.3f}, p95={p95:.1f} ms -> {'OK' if ok else 'REFUSÉ'}")
-        # Voir scripts/register_model.py pour l'enregistrement dans le Registry (stage Staging -> Production)
+    if check_gate() != 0:
+        raise SystemExit("Porte d'évaluation refusée : modèle non promu en Production")
 
 
 if __name__ == "__main__":

@@ -2,12 +2,15 @@
 
 import logging
 import os
+import threading
+from collections import Counter
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 
 from .inference import InvalidImageError, ModelNotLoadedError, YoloOnnx
 from .schemas import (
@@ -28,6 +31,9 @@ MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", "10"))
 ALLOWED_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 
 state: dict = {"model": None, "error": None}
+metrics_lock = threading.Lock()
+request_metrics: Counter = Counter()
+prediction_metrics: dict = {"count": 0, "detections": 0}
 
 
 def load_model() -> None:
@@ -52,6 +58,28 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_methods=["*"], allow_headers=["*"])
+
+
+@app.middleware("http")
+async def observe_requests(request, call_next):
+    response = await call_next(request)
+    with metrics_lock:
+        request_metrics[f"{request.method} {request.url.path} {response.status_code}"] += 1
+    return response
+
+
+@app.get("/metrics", response_class=PlainTextResponse, include_in_schema=False, tags=["system"])
+async def metrics():
+    with metrics_lock:
+        lines = ["# TYPE agrivision_http_requests_total counter"]
+        for key, value in sorted(request_metrics.items()):
+            method, path, status = key.split(" ", 2)
+            lines.append(f'agrivision_http_requests_total{{method="{method}",path="{path}",status="{status}"}} {value}')
+        lines.append("# TYPE agrivision_predictions_total counter")
+        lines.append(f"agrivision_predictions_total {prediction_metrics['count']}")
+        lines.append("# TYPE agrivision_detections_total counter")
+        lines.append(f"agrivision_detections_total {prediction_metrics['detections']}")
+    return "\n".join(lines) + "\n"
 
 
 def get_model() -> YoloOnnx:
@@ -108,7 +136,7 @@ async def model_metadata():
 @app.post(
     "/predict",
     response_model=PredictResponse,
-    responses={400: {"model": ErrorResponse}, 503: {"model": ErrorResponse}},
+    responses={400: {"model": ErrorResponse}, 413: {"model": ErrorResponse}, 503: {"model": ErrorResponse}},
     tags=["inference"],
 )
 async def predict(
@@ -118,13 +146,17 @@ async def predict(
 ):
     m = get_model()
     img = await read_image(file, m)
-    return await run_in_threadpool(m.predict, img, conf, iou)
+    result = await run_in_threadpool(m.predict, img, conf, iou)
+    with metrics_lock:
+        prediction_metrics["count"] += 1
+        prediction_metrics["detections"] += len(result["detections"])
+    return result
 
 
 @app.post(
     "/predict/visualize",
     response_model=VisualizeResponse,
-    responses={400: {"model": ErrorResponse}, 503: {"model": ErrorResponse}},
+    responses={400: {"model": ErrorResponse}, 413: {"model": ErrorResponse}, 503: {"model": ErrorResponse}},
     tags=["inference"],
 )
 async def predict_visualize(
@@ -136,4 +168,7 @@ async def predict_visualize(
     img = await read_image(file, m)
     result = await run_in_threadpool(m.predict, img, conf, iou)
     result["annotated_image_base64"] = await run_in_threadpool(m.annotate, img, result["detections"])
+    with metrics_lock:
+        prediction_metrics["count"] += 1
+        prediction_metrics["detections"] += len(result["detections"])
     return result

@@ -2,6 +2,7 @@ import io
 
 import pytest
 from PIL import Image
+from pydantic import ValidationError
 
 from app import main
 from app.inference import letterbox, nms, postprocess
@@ -96,3 +97,30 @@ def test_postprocess_decodes_ultralytics_layout():
     out[0, :, 0] = [50, 50, 20, 20, 0.0, 0.9, 0.0]
     dets = postprocess(out, 1.0, (0, 0), (100, 100), 0.3, 0.5)
     assert len(dets) == 1 and dets[0]["class_id"] == 1
+
+
+def test_metrics_endpoint(client):
+    r = client.get("/metrics")
+    assert r.status_code == 200
+    assert "agrivision_predictions_total" in r.text
+    assert "agrivision_http_requests_total" in r.text
+
+
+def test_openapi_documents_413(client):
+    spec = client.get("/openapi.json").json()
+    for path in ("/predict", "/predict/visualize"):
+        assert "413" in spec["paths"][path]["post"]["responses"]
+
+
+def test_response_schemas_reject_extra_fields():
+    from app.schemas import HealthResponse
+
+    with pytest.raises(ValidationError):
+        HealthResponse(
+            status="ok",
+            model_loaded=True,
+            gpu_available=False,
+            model_version="test-1",
+            inference_engine="onnxruntime",
+            extra_field="not allowed",
+        )

@@ -9,8 +9,8 @@ stages:
       size: 284
     - path: models/best.onnx
       hash: md5
-      md5: 20c95fba8c70d9a276961db350ae0d1e
-      size: 37972321
+      md5: f873bf96bebf27c110d1c5f1d943ee8b
+      size: 80610436
     - path: models/inference_config.json
       hash: md5
       md5: cf47cc589f4e07ed5743b402e30d5e23
@@ -21,10 +21,11 @@ stages:
       size: 2142
     - path: scripts/check_gate.py
       hash: md5
-      md5: 70661a0ec2e8822e804a7a152ff9a7fa
-      size: 1986
+      md5: 6818a10f243e5d844259be64fae82aa1
+      size: 2114
     params:
       params.yaml:
-        gate:
-          min_map50: 0.5
-          max_latency_ms: 500
+        evaluate:
+          gate:
+            min_map50: 0.5
+            max_latency_p95_ms: 150

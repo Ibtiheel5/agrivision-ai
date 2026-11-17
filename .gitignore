@@ -1,7 +1,9 @@
 data/raw/*
 data/processed/*
+data/test_all/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/test_all/README.md
 models/*.pt
 models/*.onnx
 runs/
@@ -14,3 +16,4 @@ frontend/dist/
 .env
 *.pyc
 .pytest_cache/
+reports/all_classes_report.json

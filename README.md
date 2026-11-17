@@ -71,6 +71,7 @@ L'entraînement peut aussi se faire sur Kaggle ; il suffit de déposer `best.pt`
 |---|---|
 | FastAPI `/health`, `/model/metadata`, `/predict`, `/predict/visualize`, Swagger, Pydantic, 400 / 503 | `backend/app/` |
 | Tests Pytest (endpoints, NMS, prétraitement, 400/503/413) | `backend/tests/`, `tests/` |
+| Test des 29 classes avec photos réelles | `scripts/test_all_classes.py`, `data/test_all/` |
 | Frontend : drag & drop, galerie, webcam, canvas de boîtes, barres de scores, latence client + serveur | `frontend/src/` |
 | ONNX Runtime + parité + benchmark | `backend/app/inference.py`, `src/models/export_onnx.py` |
 | DVC (`dvc.yaml`, `params.yaml`), anti-fuite de données | `dvc.yaml`, `src/data/dataset.py` |

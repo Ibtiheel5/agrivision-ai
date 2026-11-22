@@ -3,11 +3,18 @@ import { thumbnail } from "./history";
 const KEY = "agrivision-plants";
 
 export function loadPlants() {
-  const saved = localStorage.getItem(KEY);
-  if (!saved) return [];
-  const plants = JSON.parse(saved);
-  if (!Array.isArray(plants)) throw new Error("Le carnet de plantes est illisible.");
-  return plants;
+  try {
+    const saved = localStorage.getItem(KEY);
+    if (!saved) return [];
+    const plants = JSON.parse(saved);
+    return Array.isArray(plants) ? plants : [];
+  } catch {
+    return [];
+  }
+}
+
+function savePlants(plants) {
+  localStorage.setItem(KEY, JSON.stringify(plants));
 }
 
 export async function addPlant({ name, notes, image }) {
@@ -18,10 +25,14 @@ export async function addPlant({ name, notes, image }) {
     image: image ? await thumbnail(image, 480) : null,
     createdAt: Date.now(),
   };
-  localStorage.setItem(KEY, JSON.stringify([plant, ...loadPlants()]));
+  savePlants([plant, ...loadPlants()]);
   return plant;
 }
 
 export function deletePlant(id) {
-  localStorage.setItem(KEY, JSON.stringify(loadPlants().filter((plant) => plant.id !== id)));
+  savePlants(loadPlants().filter((plant) => plant.id !== id));
+}
+
+export function getPlant(id) {
+  return loadPlants().find((plant) => plant.id === id) || null;
 }

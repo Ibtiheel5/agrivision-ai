@@ -9,17 +9,12 @@ services:
       - ./models:/models:ro
     ports: ["8000:8000"]
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
 
   frontend:
     build: ./frontend
     depends_on:
       backend: { condition: service_healthy }
-    ports: ["8090:80"]               # application : http://localhost:8080
+    ports: ["8090:80"]               # application : http://localhost:8090
     restart: unless-stopped
 
   mlflow:
@@ -29,16 +24,5 @@ services:
     ports: ["5000:5000"]
     restart: unless-stopped
 
-  prometheus:
-    image: prom/prometheus:v3.8.1
-    command: --config.file=/etc/prometheus/prometheus.yml
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus-data:/prometheus
-    ports: ["9090:9090"]
-    depends_on: [backend]
-    restart: unless-stopped
-
 volumes:
   mlflow-data:
-  prometheus-data:

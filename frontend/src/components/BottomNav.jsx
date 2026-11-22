@@ -2,13 +2,13 @@ import { Link, NavLink } from "react-router-dom";
 import Icon from "./Icon";
 import { useLang } from "../LangContext";
 
-const item = ({ isActive }) => `relative flex min-h-12 flex-1 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[10px] font-medium transition ${isActive ? "text-[#43833c] after:absolute after:top-0 after:h-0.5 after:w-5 after:rounded-full after:bg-[#62a34b]" : "text-[#a0a79d] hover:text-[#587b50]"}`;
+const item = ({ isActive }) => `relative flex min-h-12 flex-1 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[10px] font-medium transition ${isActive ? "text-[#43833c] after:absolute after:-bottom-0 after:h-1 after:w-1 after:rounded-full after:bg-[#62a34b]" : "text-[#8d9888] hover:text-[#587b50]"}`;
 
 /** Barre mobile : accueil, carnet, scanner, historique et outils. */
 export default function BottomNav() {
   const { t } = useLang();
   return (
-    <nav aria-label={t("app")} className="fixed inset-x-0 bottom-0 z-40 mx-auto flex h-[76px] max-w-xl items-center rounded-t-[1.4rem] border-t border-[#edf0e9] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(26,54,32,0.07)] backdrop-blur">
+    <nav aria-label={t("app")} className="fixed inset-x-0 bottom-0 z-40 mx-auto flex h-[76px] max-w-xl items-center rounded-t-[1.4rem] border-t border-[#edf0e9] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_rgba(26,54,32,0.10)] backdrop-blur-xl">
       <NavLink to="/" end className={item}>
         <Icon name="home" className="h-[19px] w-[19px]" />
         {t("navHome")}

@@ -1,26 +1,51 @@
-// Historique local (hors-ligne) : 20 dernières analyses, miniature comprise.
 const KEY = "history";
+
+function normalize(entry) {
+  return {
+    date: entry.date ?? Date.now(),
+    thumb: entry.thumb ?? null,
+    image: entry.image ?? null,
+    top: entry.top ?? null,
+    confidence: entry.confidence ?? null,
+    detections: Array.isArray(entry.detections) ? entry.detections.slice(0, 5) : [],
+    plantId: entry.plantId ?? null,
+    plantName: entry.plantName ?? null,
+    notes: entry.notes ?? "",
+    feedback: entry.feedback ?? null,
+  };
+}
+
 export const loadHistory = () => {
   try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
+    const items = JSON.parse(localStorage.getItem(KEY) || "[]");
+    return Array.isArray(items) ? items.map(normalize) : [];
   } catch {
     return [];
   }
 };
+
 export function addHistory(entry) {
   try {
-    localStorage.setItem(KEY, JSON.stringify([entry, ...loadHistory()].slice(0, 20)));
+    localStorage.setItem(KEY, JSON.stringify([normalize(entry), ...loadHistory()].slice(0, 30)));
   } catch {
-    /* quota dépassé : on ignore */
+    /* quota */
   }
 }
-export const clearHistory = () => {
+
+export function updateHistory(date, patch) {
   try {
-    localStorage.removeItem(KEY);
+    const items = loadHistory().map((item) => (item.date === date ? { ...item, ...patch } : item));
+    localStorage.setItem(KEY, JSON.stringify(items));
+    return items;
   } catch {
-    /* ignore */
+    return loadHistory();
   }
+}
+
+export const clearHistory = () => {
+  try { localStorage.removeItem(KEY); } catch { /* ignore */ }
 };
+
 export async function thumbnail(file, side = 160) {
   const bmp = await createImageBitmap(file);
   const r = side / Math.max(bmp.width, bmp.height);

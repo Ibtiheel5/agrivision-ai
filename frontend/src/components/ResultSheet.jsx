@@ -2,23 +2,36 @@ import Icon from "./Icon";
 import ConfBadge from "./ConfBadge";
 import useCrops from "./useCrops";
 import { useLang } from "../LangContext";
+import { confidenceLevel } from "../services/api";
 
-function Row({ det, crop, big, onClick }) {
+function severity(confidence, t) {
+  const level = confidenceLevel(confidence);
+  const map = {
+    high: { label: t("severityHigh"), cls: "bg-red-100 text-red-800" },
+    medium: { label: t("severityMedium"), cls: "bg-amber-100 text-amber-900" },
+    low: { label: t("severityLow"), cls: "bg-[#eff7e9] text-[#3d7241]" },
+    unknown: { label: t("severityUnknown"), cls: "bg-gray-100 text-gray-700" },
+  };
+  return map[level] || map.unknown;
+}
+
+function Row({ det, crop, big, onClick, t }) {
+  const sev = severity(det.confidence, t);
   return (
-    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl border border-leaf-500/15 bg-white p-3 text-left shadow-sm active:scale-[0.99]">
-      <span className={`shrink-0 overflow-hidden rounded-xl bg-leaf-50 ${big ? "h-16 w-16" : "h-14 w-14"}`}>{crop && <img src={crop} alt="" className="h-full w-full object-cover" />}</span>
+    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl border border-[#e6ecdf] bg-white p-3 text-left shadow-sm transition hover:border-[#cfe0c3] active:scale-[0.99]">
+      <span className={`shrink-0 overflow-hidden rounded-xl bg-[#f3f7ef] ${big ? "h-16 w-16" : "h-14 w-14"}`}>{crop && <img src={crop} alt="" className="h-full w-full object-cover" />}</span>
       <span className="min-w-0 flex-1">
-        <span className={`block truncate ${big ? "font-semibold text-leaf-900" : "text-sm text-leaf-900/80"}`}>{det.label}</span>
-        <ConfBadge value={det.confidence} />
+        <span className={`block truncate ${big ? "font-semibold text-[#20372a]" : "text-sm text-[#304033]"}`}>{det.label}</span>
+        <span className="mt-1 flex flex-wrap items-center gap-2">
+          <ConfBadge value={det.confidence} />
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${sev.cls}`}>{sev.label}</span>
+        </span>
       </span>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-olive-500 text-white">
-        <Icon name="arrow" className="h-4 w-4" />
-      </span>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#4b963b] text-white"><Icon name="arrow" className="h-4 w-4" /></span>
     </button>
   );
 }
 
-/** Feuille du bas façon maquette : « Meilleur résultat » + « Autres détections ». */
 export default function ResultSheet({ src, result, onOpen, onRetake }) {
   const { t } = useLang();
   const crops = useCrops(src, result.detections);
@@ -34,25 +47,27 @@ export default function ResultSheet({ src, result, onOpen, onRetake }) {
         <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-neutral-300" />
         {best ? (
           <>
-            <h2 className="mb-2 font-bold text-leaf-900">{t("bestMatch")}</h2>
-            <Row det={best} crop={crops[0]} big onClick={() => onOpen(0)} />
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="font-bold text-[#20372a]">{t("bestMatch")}</h2>
+              <span className="text-xs text-[#768075]">{result.detections.length} d?tection(s)</span>
+            </div>
+            <Row det={best} crop={crops[0]} big onClick={() => onOpen(0)} t={t} />
             {rest.length > 0 && (
               <>
-                <h2 className="mb-2 mt-5 font-bold text-leaf-900">{t("similar")}</h2>
+                <h2 className="mb-2 mt-5 font-bold text-[#20372a]">{t("similar")}</h2>
                 <div className="space-y-2">
-                  {rest.slice(0, 6).map((d, i) => (
-                    <Row key={`${d.class_id}-${i}`} det={d} crop={crops[i + 1]} onClick={() => onOpen(i + 1)} />
-                  ))}
+                  {rest.slice(0, 6).map((d, i) => <Row key={`${d.class_id}-${i}`} det={d} crop={crops[i + 1]} onClick={() => onOpen(i + 1)} t={t} />)}
                 </div>
               </>
             )}
           </>
         ) : (
-          <p className="rounded-xl bg-amber-50 p-3 text-amber-900">{t("nothing")}</p>
+          <div className="rounded-xl bg-amber-50 p-4 text-amber-900">
+            <p className="font-semibold">{t("noDetection")}</p>
+            <p className="mt-1 text-sm">{t("nothing")}</p>
+          </div>
         )}
-        <button type="button" onClick={onRetake} className="btn btn-ghost mt-5 w-full">
-          {t("retake")}
-        </button>
+        <button type="button" onClick={onRetake} className="mt-5 flex min-h-12 w-full items-center justify-center rounded-xl border border-[#dce6d5] text-sm font-semibold text-[#3d7241]">{t("retake")}</button>
       </section>
     </div>
   );

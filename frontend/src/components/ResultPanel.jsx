@@ -3,27 +3,23 @@ import BoundingBoxCanvas from "./BoundingBoxCanvas";
 import ProbabilityBars from "./ProbabilityBars";
 import Icon from "./Icon";
 import { useLang } from "../LangContext";
+import { getDiseaseInfo, isHealthyLabel } from "../lib/diseaseInfo";
 
 export default function ResultPanel({ src, result, clientMs, lowConf = 0.5 }) {
   const { t } = useLang();
   const [view, setView] = useState("annotated");
   const top = result.detections[0];
+  const info = top ? getDiseaseInfo(top.label) : null;
+  const healthy = top ? isHealthyLabel(top.label) : false;
   return (
     <section className="space-y-4 rounded-2xl border border-[#e8ede3] bg-white p-4 shadow-[0_6px_24px_rgba(38,63,38,0.06)]">
       <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff7e9] text-[#598c40]">
-          <Icon name="sparkles" className="h-5 w-5" />
-        </span>
-        <div>
-          <h2 className="text-base font-semibold text-[#2c3d30]">{t("results")}</h2>
-          <p className="text-[11px] text-[#899187]">{t("resultSubtitle")}</p>
-        </div>
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff7e9] text-[#598c40]"><Icon name="sparkles" className="h-5 w-5" /></span>
+        <div><h2 className="text-base font-semibold text-[#2c3d30]">{t("results")}</h2><p className="text-[11px] text-[#899187]">{t("resultSubtitle")}</p></div>
       </div>
       <div role="tablist" className="flex gap-2">
         {["original", "annotated"].map((v) => (
-          <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)} className={`flex-1 rounded-xl px-3 py-2 text-xs font-semibold transition ${view === v ? "bg-[#246841] text-white" : "bg-[#f1f5ed] text-[#52734c]"}`}>
-            {t(v)}
-          </button>
+          <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)} className={`flex-1 rounded-xl px-3 py-2 text-xs font-semibold transition ${view === v ? "bg-[#246841] text-white" : "bg-[#f1f5ed] text-[#52734c]"}`}>{t(v)}</button>
         ))}
       </div>
       <BoundingBoxCanvas src={src} detections={view === "annotated" ? result.detections : []} imageWidth={result.image_width} imageHeight={result.image_height} />
@@ -36,25 +32,23 @@ export default function ResultPanel({ src, result, clientMs, lowConf = 0.5 }) {
             </div>
             <span className="shrink-0 rounded-full bg-[#eff7e9] px-3 py-1.5 text-xs font-semibold text-[#4f8a38]">{(top.confidence * 100).toFixed(1)}%</span>
           </div>
-          {top.confidence < lowConf && <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">⚠️ {t("low")}</p>}
+          {top.confidence < lowConf && <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{t("low")}</p>}
+          {healthy && <p className="rounded-xl bg-[#eff7e9] p-3 text-sm text-[#35693a]">{t("healthyMsg")}</p>}
           <ProbabilityBars scores={result.class_scores} detections={result.detections} />
+          {info && (
+            <div className="rounded-xl bg-[#f7faf4] p-3 text-sm text-[#556252]">
+              <p className="font-semibold text-[#314233]">{t("actions")}</p>
+              <ul className="mt-1 list-disc pl-5 space-y-1">{info.actions.slice(0,2).map((a)=><li key={a}>{a}</li>)}</ul>
+            </div>
+          )}
         </>
       ) : (
-        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{t("nothing")}</p>
+        <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900"><p className="font-semibold">{t("noDetection")}</p><p>{t("nothing")}</p></div>
       )}
       <dl className="grid grid-cols-3 gap-2 text-center text-sm">
-        <div className="rounded-xl bg-[#f3f6f0] p-2 text-[10px] text-[#778273]">
-          <dt>{t("latency")} ({t("server")})</dt>
-          <dd className="mt-1 font-mono text-sm font-semibold text-[#314233]">{result.server_latency_ms.toFixed(0)} ms</dd>
-        </div>
-        <div className="rounded-xl bg-[#f3f6f0] p-2 text-[10px] text-[#778273]">
-          <dt>{t("latency")} ({t("client")})</dt>
-          <dd className="mt-1 font-mono text-sm font-semibold text-[#314233]">{clientMs} ms</dd>
-        </div>
-        <div className="rounded-xl bg-[#f3f6f0] p-2 text-[10px] text-[#778273]">
-          <dt>{t("version")}</dt>
-          <dd className="mt-1 truncate font-mono text-xs font-semibold text-[#314233]">{result.model_version}</dd>
-        </div>
+        <div className="rounded-xl bg-[#f3f6f0] p-2 text-[10px] text-[#778273]"><dt>{t("latency")} ({t("server")})</dt><dd className="mt-1 font-mono text-sm font-semibold text-[#314233]">{result.server_latency_ms.toFixed(0)} ms</dd></div>
+        <div className="rounded-xl bg-[#f3f6f0] p-2 text-[10px] text-[#778273]"><dt>{t("latency")} ({t("client")})</dt><dd className="mt-1 font-mono text-sm font-semibold text-[#314233]">{clientMs} ms</dd></div>
+        <div className="rounded-xl bg-[#f3f6f0] p-2 text-[10px] text-[#778273]"><dt>{t("version")}</dt><dd className="mt-1 truncate font-mono text-xs font-semibold text-[#314233]">{result.model_version}</dd></div>
       </dl>
       <p className="text-[10px] leading-4 text-[#899187]">{t("disclaimer")}</p>
     </section>

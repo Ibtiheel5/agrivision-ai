@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Box(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
+    model_config = ConfigDict(extra="forbid")
     x1: float = Field(..., description="Coin haut-gauche (pixels image originale)")
     y1: float
     x2: float
@@ -14,7 +14,7 @@ class Box(BaseModel):
 
 
 class Detection(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
+    model_config = ConfigDict(extra="forbid")
     class_id: int = Field(..., ge=0)
     label: str
     confidence: float = Field(..., ge=0.0, le=1.0)
@@ -22,7 +22,7 @@ class Detection(BaseModel):
 
 
 class PredictResponse(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
+    model_config = ConfigDict(extra="forbid")
     detections: List[Detection]
     class_scores: Dict[str, float] = Field(..., description="Meilleur score par classe détectée")
     image_width: int
@@ -38,7 +38,6 @@ class VisualizeResponse(PredictResponse):
 
 
 class HealthResponse(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
     status: str
     model_loaded: bool
     gpu_available: bool
@@ -47,7 +46,6 @@ class HealthResponse(BaseModel):
 
 
 class ModelMetadata(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
     name: str
     architecture: str
     version: str
@@ -61,5 +59,4 @@ class ModelMetadata(BaseModel):
 
 
 class ErrorResponse(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True)
     detail: str

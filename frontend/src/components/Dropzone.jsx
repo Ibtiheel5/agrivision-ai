@@ -20,7 +20,7 @@ export default function Dropzone({ onFile, disabled }) {
         setOver(false);
         handle(e.dataTransfer.files[0]);
       }}
-      className={`rounded-2xl border border-dashed p-5 text-center transition ${over ? "border-[#579644] bg-[#eff7e9]" : "border-[#dce6d5] bg-white"}`}
+      className={`ui-card rounded-2xl border border-dashed p-5 text-center transition ${over ? "border-[#579644] bg-[#eff7e9] ring-4 ring-[#eff7e9]" : "border-[#dce6d5] bg-white"}`}
     >
       <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eff7e9] text-[#579344]">
         <Icon name="gallery" className="h-6 w-6" />

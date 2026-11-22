@@ -14,14 +14,13 @@ Module *Deep Learning Avancé* — **Axe 3 : détection d'objets en temps réel*
 | Application (PWA) | http://localhost:8090 |
 | API + Swagger | http://localhost:8000/docs |
 | MLflow | http://localhost:5000 |
-| Prometheus | http://localhost:9090 |
 
 Sans modèle, l'API répond **503** (comportement voulu) et l'app affiche l'erreur.
 
 ## Utilisation sur téléphone (application mobile)
 
 L'interface est une **PWA React mobile-first** (le guide impose React ou Angular) :
-1. PC et téléphone sur le même Wi-Fi ; ouvrez `http://<IP-du-PC>:8090` dans Chrome Android.
+1. PC et téléphone sur le même Wi-Fi ; ouvrez `http://<IP-du-PC>:8090` dans Chrome Android après `docker compose up`.
 2. Menu ⋮ → **Installer l'application** : icône sur l'écran d'accueil, plein écran, historique hors-ligne.
 3. Bouton **Sawwer bel telifoun** : ouvre l'appareil photo arrière (marche en HTTP).
 4. La webcam / détection continue exige **HTTPS** sur téléphone : `cloudflared tunnel --url http://localhost:8090`
@@ -38,7 +37,9 @@ pip install -r requirements-dev.txt
 MODEL_DIR=../models uvicorn app.main:app --reload  # PowerShell : $env:MODEL_DIR="../models"
 python -m pytest -q
 # Frontend (proxy /api -> :8000)
-cd frontend && npm ci && npm run dev && npm run lint && npm test
+cd frontend && npm ci && npm run dev
+npm run lint
+npm test
 ```
 ## Pipeline ML (DVC)
 
@@ -49,7 +50,6 @@ dvc add data/raw                       # PlantDoc + PlantSeg dans data/raw/plant
 dvc remote add -d storage <gdrive://... | s3://... | /chemin/local>
 mlflow server --port 5000              # ou : docker compose up mlflow
 dvc repro                              # prepare -> train -> evaluate -> export
-python scripts/check_gate.py            # bloque la promotion si mAP50/latence échouent
 python scripts/register_model.py --stage staging     # puis --stage production si la porte d'évaluation passe
 dvc push && git add . && git commit
 ```
@@ -63,6 +63,24 @@ docker compose up -d mlflow
 
 Cette importation crée un run d'artefacts; elle ne reconstitue pas les métriques par époque ni les courbes si elles ne sont pas fournies.
 
+## Vérification avant la démonstration
+
+```powershell
+docker compose config
+docker compose up --build
+```
+
+Services attendus :
+
+| Service | URL |
+|---|---|
+| Application | http://localhost:8090 |
+| API + Swagger | http://localhost:8000/docs |
+| MLflow | http://localhost:5000 |
+
+Le jeu de données source n'est pas inclus dans Git. Pour reproduire l'entraînement,
+il doit être restauré via DVC dans `data/raw/` avant `dvc repro`.
+
 L'entraînement peut aussi se faire sur Kaggle ; il suffit de déposer `best.pt`, puis `dvc repro export`.
 
 ## Correspondance avec le guide de l'enseignant
@@ -71,15 +89,13 @@ L'entraînement peut aussi se faire sur Kaggle ; il suffit de déposer `best.pt`
 |---|---|
 | FastAPI `/health`, `/model/metadata`, `/predict`, `/predict/visualize`, Swagger, Pydantic, 400 / 503 | `backend/app/` |
 | Tests Pytest (endpoints, NMS, prétraitement, 400/503/413) | `backend/tests/`, `tests/` |
-| Test des 29 classes avec photos réelles | `scripts/test_all_classes.py`, `data/test_all/` |
 | Frontend : drag & drop, galerie, webcam, canvas de boîtes, barres de scores, latence client + serveur | `frontend/src/` |
 | ONNX Runtime + parité + benchmark | `backend/app/inference.py`, `src/models/export_onnx.py` |
 | DVC (`dvc.yaml`, `params.yaml`), anti-fuite de données | `dvc.yaml`, `src/data/dataset.py` |
 | MLflow tracking + Registry (porte d'évaluation) | `src/models/train.py`, `scripts/register_model.py` |
 | Docker multi-stage + Compose | `backend/Dockerfile`, `frontend/Dockerfile`, `docker-compose.yml` |
 | CI/CD | `.github/workflows/ci-tests.yml`, `docker-build.yml` |
-| Monitoring | `/metrics`, `monitoring/prometheus.yml`, service Prometheus |
-| Rapport | `docs/rapport_complet.md`, `docs/soutenance.md` |
+| Rapport LaTeX | `docs/` (à rédiger avec vos résultats réels) |
 
 ## Limites
 

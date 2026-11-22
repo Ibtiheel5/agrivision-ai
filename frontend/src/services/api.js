@@ -2,7 +2,6 @@ import axios from "axios";
 
 const http = axios.create({ baseURL: import.meta.env.VITE_API_URL || "/api", timeout: 30000 });
 
-/** Réduit l'image (max 1280 px) pour économiser la data mobile avant l'envoi. */
 export async function compressImage(file, maxSide = 1280, quality = 0.88) {
   if (!file.type.startsWith("image/")) return file;
   const bmp = await createImageBitmap(file);
@@ -16,7 +15,6 @@ export async function compressImage(file, maxSide = 1280, quality = 0.88) {
   return new File([blob], "photo.jpg", { type: "image/jpeg" });
 }
 
-/** Envoie l'image à /predict ; renvoie { data, clientLatencyMs }. */
 export async function predict(file, { conf, visualize = false } = {}) {
   const form = new FormData();
   form.append("file", file);
@@ -30,8 +28,16 @@ export async function predict(file, { conf, visualize = false } = {}) {
 export const getHealth = () => http.get("/health").then((r) => r.data);
 export const getMetadata = () => http.get("/model/metadata").then((r) => r.data);
 
+export function confidenceLevel(confidence) {
+  if (confidence == null) return "unknown";
+  if (confidence >= 0.75) return "high";
+  if (confidence >= 0.5) return "medium";
+  return "low";
+}
+
 export function errorMessage(err) {
-  if (err.response) return `${err.response.status} — ${err.response.data?.detail ?? "erreur serveur"}`;
-  if (err.code === "ECONNABORTED") return "Délai dépassé";
-  return "Serveur injoignable";
+  if (err.response) return `${err.response.status} ? ${err.response.data?.detail ?? "erreur serveur"}`;
+  if (err.code === "ECONNABORTED") return "D?lai d?pass?";
+  if (err.message === "Network Error" || (!err.response && !err.code && !err.message)) return "Serveur injoignable";
+  return err.message || "Erreur inattendue";
 }

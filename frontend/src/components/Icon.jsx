@@ -105,6 +105,12 @@ const PATHS = {
   ),
   stop: <rect x="6" y="6" width="12" height="12" rx="2" />,
   close: <path d="m18 6-12 12M6 6l12 12" />,
+  mic: (
+    <>
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5 11a7 7 0 0014 0M12 18v3M8 21h8" />
+    </>
+  ),
 };
 
 export default function Icon({ name, className = "h-6 w-6" }) {

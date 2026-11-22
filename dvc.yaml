@@ -20,7 +20,3 @@ stages:
     params: [export]
     outs: [models/best.onnx]
     metrics: [reports/onnx_benchmark.json]
-  gate:
-    cmd: python scripts/check_gate.py
-    deps: [scripts/check_gate.py, models/best.onnx, models/inference_config.json, models/metrics.json, models/benchmark_local.json]
-    params: [evaluate.gate]

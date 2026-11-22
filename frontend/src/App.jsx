@@ -9,12 +9,13 @@ import PlantDetail from "./pages/PlantDetail";
 import Tools from "./pages/Tools";
 import PageShell from "./components/PageShell";
 import BottomNav from "./components/BottomNav";
+import VoiceAssistant from "./components/VoiceAssistant";
 import { useLang } from "./LangContext";
 
 export default function App() {
   const { t } = useLang();
   return (
-    <div className="mx-auto min-h-screen max-w-xl" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+    <div className="mx-auto min-h-screen max-w-xl overflow-x-hidden bg-[#f7f8f3] sm:my-4 sm:min-h-[calc(100vh-2rem)] sm:overflow-hidden sm:rounded-[2rem] sm:border sm:border-white/70 sm:shadow-[0_24px_70px_rgba(30,67,39,0.16)]" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/scan" element={<Scan />} />
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/scan" element={null} />
         <Route path="*" element={<BottomNav />} />
       </Routes>
+      <VoiceAssistant />
     </div>
   );
 }

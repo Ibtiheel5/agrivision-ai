@@ -14,3 +14,16 @@ frontend/dist/
 .env
 *.pyc
 .pytest_cache/
+
+.venv*/
+.env
+mlflow.db
+mlartifacts/
+data/raw/
+data/processed/
+*.sqlite3
+*.bak
+*.onnx
+*.pt
+models/fruit/*.onnx
+*.zip

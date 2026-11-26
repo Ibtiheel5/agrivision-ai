@@ -1,4 +1,5 @@
 """Test de la préparation des données sur un mini-jeu synthétique (anti-fuite)."""
+
 import os
 from pathlib import Path
 
@@ -23,12 +24,22 @@ def make_src(root: Path, names, splits):
 
 def test_build_no_leak(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    make_src(tmp_path / "pd", ["A", "Soyabean"], {"train": [("p1", (10, 10, 10), 0)],
-             "valid": [("v1", (200, 0, 0), 1)], "test": [("t1", (0, 200, 0), 0)]})
+    make_src(
+        tmp_path / "pd",
+        ["A", "Soyabean"],
+        {"train": [("p1", (10, 10, 10), 0)], "valid": [("v1", (200, 0, 0), 1)], "test": [("t1", (0, 200, 0), 0)]},
+    )
     # PlantSeg : s1 est un DOUBLON de v1 (même image) -> doit disparaître ; s2 est légitime
     make_src(tmp_path / "ps", ["Soybean", "A"], {"train": [("s1", (200, 0, 0), 0), ("s2", (0, 0, 200), 1)]})
-    params = {"seed": 1, "data": {"processed_dir": "out", "dedup_hash_size": 8, "class_merge": {"Soyabean": "Soybean"},
-              "datasets": {"plantdoc": "pd", "plantseg": "ps"}}}
+    params = {
+        "seed": 1,
+        "data": {
+            "processed_dir": "out",
+            "dedup_hash_size": 8,
+            "class_merge": {"Soyabean": "Soybean"},
+            "datasets": {"plantdoc": "pd", "plantseg": "ps"},
+        },
+    }
     dataset.build(params)
     names = yaml.safe_load(Path("out/data.yaml").read_text())["names"]
     assert sorted(names.values()) == ["A", "Soybean"]  # fusion Soyabean/Soybean

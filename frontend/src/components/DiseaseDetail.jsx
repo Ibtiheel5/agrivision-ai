@@ -4,6 +4,7 @@ import ProbabilityBars from "./ProbabilityBars";
 import ConfBadge from "./ConfBadge";
 import Icon from "./Icon";
 import { useLang } from "../LangContext";
+import { describe } from "../lib/labels";
 
 /** Détail d'une détection : image encadrée, confiance, avertissement, détails techniques repliables. */
 export default function DiseaseDetail({ src, result, index, clientMs, conf, onConf, onRerun, onBack, lowConf = 0.5 }) {
@@ -18,11 +19,12 @@ export default function DiseaseDetail({ src, result, index, clientMs, conf, onCo
           <Icon name="back" />
         </button>
         <BoundingBoxCanvas src={src} detections={[det]} imageWidth={result.image_width} imageHeight={result.image_height} />
-        <h1 className="mt-4 text-xl font-bold text-leaf-900">{det.label}</h1>
+        <h1 className="mt-4 text-xl font-bold text-leaf-900">{describe(det.label).short}</h1>
         <div className="mt-1 flex items-center gap-2 text-sm text-leaf-700">
           {t("confidence")} <ConfBadge value={det.confidence} />
         </div>
         {det.confidence < lowConf && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">⚠️ {t("low")}</p>}
+        {det.fallback_full_image && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">⚠️ Aucun fruit isolé détecté : l’image entière a été analysée.</p>}
         <div className="mt-5">
           <ProbabilityBars scores={result.class_scores} detections={result.detections} />
         </div>

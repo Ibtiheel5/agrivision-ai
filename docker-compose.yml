@@ -14,7 +14,7 @@ services:
     build: ./frontend
     depends_on:
       backend: { condition: service_healthy }
-    ports: ["8090:80"]               # application : http://localhost:8080
+    ports: ["8090:80"]               # application : http://localhost:8090
     restart: unless-stopped
 
   mlflow:

@@ -1,0 +1,5 @@
+outs:
+- md5: 88254ca33a687761446a5af2627ce6ad
+  size: 37928229
+  hash: md5
+  path: fruit_detector.onnx

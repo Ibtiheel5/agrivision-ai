@@ -9,6 +9,7 @@ import base64
 import io
 import json
 import logging
+import os
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -122,7 +123,15 @@ class YoloOnnx:
         self.classes = [ln.strip() for ln in self.classes_path.read_text(encoding="utf-8").splitlines() if ln.strip()]
         available = ort.get_available_providers()
         providers = [p for p in ("CUDAExecutionProvider", "CPUExecutionProvider") if p in available]
-        self.session = ort.InferenceSession(str(self.model_path), providers=providers)
+        session_options = ort.SessionOptions()
+        session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        session_options.intra_op_num_threads = max(1, min(4, os.cpu_count() or 1))
+        session_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+        self.session = ort.InferenceSession(
+            str(self.model_path),
+            sess_options=session_options,
+            providers=providers,
+        )
         self.gpu = "CUDAExecutionProvider" in self.session.get_providers()
         inp = self.session.get_inputs()[0]
         self.input_name = inp.name

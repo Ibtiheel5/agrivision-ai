@@ -250,6 +250,18 @@ Le pipeline local existant produit aussi `models/best.pt` et vise un entraîneme
 | Frontend | Build et lint réussis; tests frontend réussis (3 tests) |
 | Caméra sur appareil réel | Non certifiée par les tests automatisés; dépend des permissions, du navigateur et de l’HTTPS |
 
+## 10.1 État des exigences et éléments à fournir
+
+| Élément demandé | État actuel | Action restante |
+|---|---|---|
+| API FastAPI et Swagger | Réalisé | Rejouer la démonstration sur la machine de remise |
+| Frontend React et visualisation | Réalisé | Tester la caméra sur le téléphone cible |
+| Tests automatisés | Réalisé | Conserver les sorties CI comme preuve |
+| Docker Compose | Configuré | Exécuter `docker compose up --build` et archiver les logs |
+| DVC | Pipeline et métadonnées présents | Restaurer `data/raw/` via le remote DVC pour reproduire l'entraînement |
+| MLflow | Artefacts et métriques importés | Ajouter les courbes et métriques par époque si disponibles sur Kaggle |
+| Rapport final | Ce rapport Markdown | Exporter en PDF pour la remise |
+
 ## 11. Limites et précautions
 
 - Les métriques proviennent des métadonnées fournies pour le run Kaggle; les rapports d’évaluation complets n’ont pas été importés.
@@ -260,7 +272,7 @@ Le pipeline local existant produit aussi `models/best.pt` et vise un entraîneme
 - L’inférence Docker observée utilise le CPU. Aucune accélération GPU n’a été constatée.
 - Les datasets sources PlantDoc/PlantSeg ne sont pas présents localement dans `data/raw/`; l’entraînement nécessite leur disponibilité là où le pipeline est exécuté.
 - Le modèle est une aide à la décision; ses prédictions ne remplacent pas une expertise agronomique.
-- Une incohérence documentaire reste à vérifier : le README annonce l’application sur le port 8080, alors que le mapping actuel de Compose expose `8090:80`.
+- Le frontend Docker est exposé sur le port `8090` (`8090:80`) afin d'éviter les conflits fréquents avec des services locaux utilisant le port 8080.
 
 ## 12. Prochaines étapes recommandées
 

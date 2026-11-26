@@ -1,0 +1,5 @@
+outs:
+- md5: 4bd3a2dec8b49e22edb0dcdc153fccc2
+  size: 16703967
+  hash: md5
+  path: classifier.onnx

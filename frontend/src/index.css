@@ -2,14 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-html { min-width: 320px; background: #f7f8f3; }
-body { min-width: 320px; min-height: 100vh; -webkit-tap-highlight-color: transparent; font-family: theme("fontFamily.sans"); background: #f7f8f3; color: #12301f; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
-button, a { -webkit-tap-highlight-color: transparent; }
+html { min-width: 320px; background: #eef2e8; scroll-behavior: smooth; }
+body { min-width: 320px; min-height: 100vh; -webkit-tap-highlight-color: transparent; font-family: theme("fontFamily.sans"); background: radial-gradient(circle at top, #f7faf4 0, #eef2e8 55%, #e7eddf 100%); color: #12301f; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
+::selection { background: #cfe8b7; color: #173c25; }
+* { scrollbar-width: thin; scrollbar-color: #b8c9ad transparent; }
+img { user-select: none; }
 :focus-visible { outline: 3px solid #8fbd58; outline-offset: 3px; }
-.btn { @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-4 text-lg font-semibold min-h-[56px] transition active:scale-95; }
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-4 text-lg font-semibold min-h-[56px] transition duration-200 active:scale-[0.97]; }
 .btn-primary { @apply bg-leaf-500 text-white hover:bg-leaf-700; }
 .btn-ghost { @apply bg-white text-leaf-700 border-2 border-leaf-500 hover:bg-leaf-50; }
 .card { @apply rounded-2xl bg-white p-4 shadow-sm border border-leaf-500/15; }
+
+.ui-card {
+  box-shadow: 0 8px 24px rgba(38, 63, 38, 0.055);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.ui-card:hover {
+  border-color: rgba(75, 150, 59, 0.22);
+  box-shadow: 0 12px 30px rgba(38, 63, 38, 0.09);
+  transform: translateY(-1px);
+}
+
+.safe-bottom {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  #root {
+    min-height: 100vh;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

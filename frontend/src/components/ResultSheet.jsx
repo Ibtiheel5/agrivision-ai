@@ -2,13 +2,14 @@ import Icon from "./Icon";
 import ConfBadge from "./ConfBadge";
 import useCrops from "./useCrops";
 import { useLang } from "../LangContext";
+import { describe } from "../lib/labels";
 
 function Row({ det, crop, big, onClick }) {
   return (
     <button type="button" onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl border border-leaf-500/15 bg-white p-3 text-left shadow-sm active:scale-[0.99]">
       <span className={`shrink-0 overflow-hidden rounded-xl bg-leaf-50 ${big ? "h-16 w-16" : "h-14 w-14"}`}>{crop && <img src={crop} alt="" className="h-full w-full object-cover" />}</span>
       <span className="min-w-0 flex-1">
-        <span className={`block truncate ${big ? "font-semibold text-leaf-900" : "text-sm text-leaf-900/80"}`}>{det.label}</span>
+        <span className={`block truncate ${big ? "font-semibold text-leaf-900" : "text-sm text-leaf-900/80"}`}>{describe(det.label).short}</span>
         <ConfBadge value={det.confidence} />
       </span>
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-olive-500 text-white">

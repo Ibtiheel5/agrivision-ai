@@ -1,3 +1,14 @@
+# Images de test par classe
+
+Mets au moins une photo par classe dans le dossier portant son nom exact, puis lance :
+
+```bash
+python scripts/test_all_classes.py --api http://localhost:8000 --images data/test_all
+```
+
+Le script génère `reports/all_classes_report.json` avec le top-1, la confiance, la précision par classe et la liste des classes sans image.
+
+```text
 Apple Scab Leaf
 Apple leaf
 Apple rust leaf
@@ -27,3 +38,4 @@ Tomato mold leaf
 Tomato two spotted spider mites leaf
 grape leaf black rot
 grape leaf
+```

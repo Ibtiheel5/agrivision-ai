@@ -1,0 +1,5 @@
+Dépose ici une photo de couverture par culture, nommée avec la clé de la culture :
+    tomate.jpg, pommeDeTerre.jpg, poivron.jpg, mais.jpg, vigne.jpg, pommier.jpg,
+    courge.jpg, fraisier.jpg, autres.jpg
+
+Le script scripts/extract_crop_photos.py les génère depuis ton dataset.

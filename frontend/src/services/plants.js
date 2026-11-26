@@ -1,27 +1,25 @@
+// Carnet de plantes. Façade au-dessus du stockage durable : les photos ne sont plus perdues
+// quand le quota du navigateur est atteint, et le carnet n'est plus limité.
+import { all, clear, get, put, remove } from "./store";
 import { thumbnail } from "./history";
 
-const KEY = "agrivision-plants";
-
-export function loadPlants() {
-  const saved = localStorage.getItem(KEY);
-  if (!saved) return [];
-  const plants = JSON.parse(saved);
-  if (!Array.isArray(plants)) throw new Error("Le carnet de plantes est illisible.");
-  return plants;
-}
+export const loadPlants = () => all("plants");
+export const getPlant = (id) => get("plants", id);
 
 export async function addPlant({ name, notes, image }) {
-  const plant = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    name: name.trim(),
-    notes: notes.trim(),
-    image: image ? await thumbnail(image, 480) : null,
+  return put("plants", {
+    name: (name ?? "").trim(),
+    notes: (notes ?? "").trim(),
+    image: image ? await thumbnail(image, 640, 0.72) : null,
     createdAt: Date.now(),
-  };
-  localStorage.setItem(KEY, JSON.stringify([plant, ...loadPlants()]));
-  return plant;
+  });
 }
 
-export function deletePlant(id) {
-  localStorage.setItem(KEY, JSON.stringify(loadPlants().filter((plant) => plant.id !== id)));
+export async function updatePlant(id, patch) {
+  const current = get("plants", id);
+  if (!current) return null;
+  return put("plants", { ...current, ...patch });
 }
+
+export const deletePlant = (id) => remove("plants", id);
+export const clearPlants = () => clear("plants");

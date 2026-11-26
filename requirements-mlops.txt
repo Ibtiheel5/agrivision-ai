@@ -1,0 +1,9 @@
+dvc
+mlflow==3.17.0
+prefect
+pre-commit
+onnx>=1.16
+onnxruntime==1.20.1
+numpy>=1.26,<2.2
+pillow>=10.4
+pyyaml

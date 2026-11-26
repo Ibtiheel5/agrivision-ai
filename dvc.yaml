@@ -1,0 +1,13 @@
+stages:
+  evaluate:
+    cmd: python scripts/evaluate.py
+    deps:
+      - scripts/evaluate.py
+      - models/classifier.onnx
+      - models/classes.json
+      - data/eval
+    params:
+      - eval
+    metrics:
+      - metrics/classifier.json:
+          cache: false

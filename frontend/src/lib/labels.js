@@ -1,4 +1,4 @@
-// Noms d'affichage en français pour les 30 classes PlantDoc.
+// Noms d'affichage en français pour les 30 classes PlantDoc (feuilles) et pour les classes fruits / légumes.
 // L'API renvoie toujours le libellé brut du dataset ; ce dictionnaire ne change pas les ids de classe.
 // (À relire avec une source agronomique avant le rapport.)
 const SAINE = "Saine";
@@ -35,7 +35,22 @@ const MAP = {
   "grape leaf": ["Vigne", SAINE],
 };
 
+// Fruits / légumes : le modèle renvoie « Produit__état » (ex. « Mango__rotten »).
+const FRUIT = {
+  Apple: "Pomme", Banana: "Banane", Orange: "Orange", Grape: "Raisin", Guava: "Goyave", Jujube: "Jujube",
+  Pomegranate: "Grenade", Strawberry: "Fraise", Mango: "Mangue", Tomato: "Tomate", Potato: "Pomme de terre",
+  Bell_pepper: "Poivron", Carrot: "Carotte", Cucumber: "Concombre", Lemon: "Citron", Watermelon: "Pastèque",
+  Carambola: "Carambole", Peach: "Pêche", Plum: "Prune", Pear: "Poire", Spinach: "Épinards",
+};
+const FRUIT_STATE = { fresh: "Frais", rotten: "Pourri", diseased: "Malade" };
+
 export function describe(raw) {
+  if (typeof raw === "string" && raw.includes("__")) {
+    const [p, s] = raw.split("__");
+    const crop = FRUIT[p] ?? p.replace(/_/g, " ");
+    const condition = FRUIT_STATE[s] ?? s;
+    return { crop, condition, healthy: s === "fresh", short: `${crop} · ${condition}`, raw };
+  }
   const m = MAP[raw];
   if (!m) return { crop: raw, condition: "", healthy: false, short: raw, raw };
   const [crop, condition] = m;

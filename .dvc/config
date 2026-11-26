@@ -1,4 +1,6 @@
 [core]
-    remote = origin
+    remote = local
 ['remote "origin"']
     url = https://dagshub.com/Ibtiheel5/agrivision-ai.dvc
+['remote "local"']
+    url = C:\dvc-storage

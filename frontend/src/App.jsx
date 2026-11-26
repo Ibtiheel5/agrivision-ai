@@ -7,15 +7,32 @@ import History from "./pages/History";
 import Plants from "./pages/Plants";
 import PlantDetail from "./pages/PlantDetail";
 import Tools from "./pages/Tools";
+import Assistant from "./pages/Assistant";
+import Library from "./pages/Library";
+import LibraryDetail from "./pages/LibraryDetail";
+import Weather from "./pages/Weather";
+import RiskMap from "./pages/RiskMap";
+import Settings from "./pages/Settings";
 import PageShell from "./components/PageShell";
 import BottomNav from "./components/BottomNav";
-import VoiceAssistant from "./components/VoiceAssistant";
 import { useLang } from "./LangContext";
+import Analyse from "./pages/Analyse";
+
 
 export default function App() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  const fr = lang === "fr";
+  // Titre d'en-tête par page secondaire.
+  const titre = {
+    assistant: fr ? "Assistant" : "El mousa3ed",
+    library: fr ? "Bibliothèque des maladies" : "Maktabet el amradh",
+    weather: fr ? "Météo agricole" : "Ta9s el fla7a",
+    risk: fr ? "Carte des risques" : "Carte el ma5ater",
+    settings: fr ? "Réglages" : "Réglages",
+  };
+
   return (
-    <div className="mx-auto min-h-screen max-w-xl overflow-x-hidden bg-[#f7f8f3] sm:my-4 sm:min-h-[calc(100vh-2rem)] sm:overflow-hidden sm:rounded-[2rem] sm:border sm:border-white/70 sm:shadow-[0_24px_70px_rgba(30,67,39,0.16)]" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+    <div className="mx-auto min-h-screen max-w-xl bg-canvas" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/scan" element={<Scan />} />
@@ -25,12 +42,18 @@ export default function App() {
         <Route path="/tools" element={<PageShell title={t("tools")}><Tools /></PageShell>} />
         <Route path="/model" element={<PageShell title={t("model")}><Model /></PageShell>} />
         <Route path="/advanced" element={<PageShell title={t("live")}><Analyze /></PageShell>} />
+        <Route path="/assistant" element={<PageShell title={titre.assistant}><Assistant /></PageShell>} />
+        <Route path="/library" element={<PageShell title={titre.library}><Library /></PageShell>} />
+        <Route path="/library/:diseaseId" element={<PageShell title={titre.library}><LibraryDetail /></PageShell>} />
+        <Route path="/weather" element={<PageShell title={titre.weather}><Weather /></PageShell>} />
+        <Route path="/risk-map" element={<PageShell title={titre.risk}><RiskMap /></PageShell>} />
+        <Route path="/settings" element={<PageShell title={titre.settings}><Settings /></PageShell>} />
+        <Route path="/analyse/:analyseId" element={<PageShell title="Analyse"><Analyse /></PageShell>} />
       </Routes>
       <Routes>
         <Route path="/scan" element={null} />
         <Route path="*" element={<BottomNav />} />
       </Routes>
-      <VoiceAssistant />
     </div>
   );
 }

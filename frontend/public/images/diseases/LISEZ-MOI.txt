@@ -1,0 +1,8 @@
+Dépose ici une photo par fiche maladie, nommée avec l'identifiant de la fiche :
+    tomate-mildiou.jpg, vigne-black-rot.jpg, mais-rouille.jpg, ...
+
+Le plus simple : lancer depuis la racine du projet
+    python scripts/extract_crop_photos.py CHEMIN_DE_TON_DATASET
+
+Tant qu'une photo manque, l'application affiche une image de remplacement, puis une vignette
+dessinée. Rien ne casse et aucune icône d'image cassée n'apparaît.

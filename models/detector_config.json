@@ -1,0 +1,17 @@
+{
+ "model": "v5_leaf_det",
+ "imgsz": 640,
+ "conf": 0.25,
+ "iou": 0.5,
+ "classes": [
+  "leaf"
+ ],
+ "metrics": {
+  "split": "test",
+  "mAP50": 0.9318606673294143,
+  "mAP50_95": 0.6872676996507135,
+  "precision": 0.8945974094945005,
+  "recall": 0.8412656868266583
+ },
+ "note": "sortie (1, 5, N) : xywh en pixels letterbox + score ; NMS a faire cote application"
+}

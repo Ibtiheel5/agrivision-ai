@@ -1,0 +1,9 @@
+{
+  "version": "fruit-two-stage",
+  "conf_threshold": 0.3893893893893894,
+  "iou_threshold": 0.5,
+  "extra": {
+    "pipeline": "fruit_detector+classifier",
+    "classifier": "convnextv2_tiny.fcmae_ft_in22k_in1k"
+  }
+}

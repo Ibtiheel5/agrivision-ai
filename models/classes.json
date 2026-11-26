@@ -1,0 +1,818 @@
+[
+ {
+  "id": 0,
+  "label": "apple___black rot",
+  "plant": "apple",
+  "disease": "black rot"
+ },
+ {
+  "id": 1,
+  "label": "apple___healthy",
+  "plant": "apple",
+  "disease": "healthy"
+ },
+ {
+  "id": 2,
+  "label": "apple___mosaic virus",
+  "plant": "apple",
+  "disease": "mosaic virus"
+ },
+ {
+  "id": 3,
+  "label": "apple___rust",
+  "plant": "apple",
+  "disease": "rust"
+ },
+ {
+  "id": 4,
+  "label": "apple___scab",
+  "plant": "apple",
+  "disease": "scab"
+ },
+ {
+  "id": 5,
+  "label": "banana___anthracnose",
+  "plant": "banana",
+  "disease": "anthracnose"
+ },
+ {
+  "id": 6,
+  "label": "banana___black leaf streak",
+  "plant": "banana",
+  "disease": "black leaf streak"
+ },
+ {
+  "id": 7,
+  "label": "banana___bunchy top",
+  "plant": "banana",
+  "disease": "bunchy top"
+ },
+ {
+  "id": 8,
+  "label": "banana___cigar end rot",
+  "plant": "banana",
+  "disease": "cigar end rot"
+ },
+ {
+  "id": 9,
+  "label": "banana___cordana leaf spot",
+  "plant": "banana",
+  "disease": "cordana leaf spot"
+ },
+ {
+  "id": 10,
+  "label": "banana___healthy",
+  "plant": "banana",
+  "disease": "healthy"
+ },
+ {
+  "id": 11,
+  "label": "banana___panama disease",
+  "plant": "banana",
+  "disease": "panama disease"
+ },
+ {
+  "id": 12,
+  "label": "basil___downy mildew",
+  "plant": "basil",
+  "disease": "downy mildew"
+ },
+ {
+  "id": 13,
+  "label": "basil___healthy",
+  "plant": "basil",
+  "disease": "healthy"
+ },
+ {
+  "id": 14,
+  "label": "bean___halo blight",
+  "plant": "bean",
+  "disease": "halo blight"
+ },
+ {
+  "id": 15,
+  "label": "bean___healthy",
+  "plant": "bean",
+  "disease": "healthy"
+ },
+ {
+  "id": 16,
+  "label": "bean___mosaic virus",
+  "plant": "bean",
+  "disease": "mosaic virus"
+ },
+ {
+  "id": 17,
+  "label": "bean___rust",
+  "plant": "bean",
+  "disease": "rust"
+ },
+ {
+  "id": 18,
+  "label": "bell pepper___bacterial spot",
+  "plant": "bell pepper",
+  "disease": "bacterial spot"
+ },
+ {
+  "id": 19,
+  "label": "bell pepper___blossom end rot",
+  "plant": "bell pepper",
+  "disease": "blossom end rot"
+ },
+ {
+  "id": 20,
+  "label": "bell pepper___healthy",
+  "plant": "bell pepper",
+  "disease": "healthy"
+ },
+ {
+  "id": 21,
+  "label": "bell pepper___spot",
+  "plant": "bell pepper",
+  "disease": "spot"
+ },
+ {
+  "id": 22,
+  "label": "blueberry___anthracnose",
+  "plant": "blueberry",
+  "disease": "anthracnose"
+ },
+ {
+  "id": 23,
+  "label": "blueberry___healthy",
+  "plant": "blueberry",
+  "disease": "healthy"
+ },
+ {
+  "id": 24,
+  "label": "blueberry___mummy berry",
+  "plant": "blueberry",
+  "disease": "mummy berry"
+ },
+ {
+  "id": 25,
+  "label": "blueberry___rust",
+  "plant": "blueberry",
+  "disease": "rust"
+ },
+ {
+  "id": 26,
+  "label": "blueberry___scorch",
+  "plant": "blueberry",
+  "disease": "scorch"
+ },
+ {
+  "id": 27,
+  "label": "broccoli___alternaria leaf spot",
+  "plant": "broccoli",
+  "disease": "alternaria leaf spot"
+ },
+ {
+  "id": 28,
+  "label": "broccoli___downy mildew",
+  "plant": "broccoli",
+  "disease": "downy mildew"
+ },
+ {
+  "id": 29,
+  "label": "broccoli___healthy",
+  "plant": "broccoli",
+  "disease": "healthy"
+ },
+ {
+  "id": 30,
+  "label": "cabbage___alternaria leaf spot",
+  "plant": "cabbage",
+  "disease": "alternaria leaf spot"
+ },
+ {
+  "id": 31,
+  "label": "cabbage___black rot",
+  "plant": "cabbage",
+  "disease": "black rot"
+ },
+ {
+  "id": 32,
+  "label": "cabbage___downy mildew",
+  "plant": "cabbage",
+  "disease": "downy mildew"
+ },
+ {
+  "id": 33,
+  "label": "cabbage___healthy",
+  "plant": "cabbage",
+  "disease": "healthy"
+ },
+ {
+  "id": 34,
+  "label": "carrot___alternaria leaf blight",
+  "plant": "carrot",
+  "disease": "alternaria leaf blight"
+ },
+ {
+  "id": 35,
+  "label": "carrot___cavity spot",
+  "plant": "carrot",
+  "disease": "cavity spot"
+ },
+ {
+  "id": 36,
+  "label": "cauliflower___alternaria leaf spot",
+  "plant": "cauliflower",
+  "disease": "alternaria leaf spot"
+ },
+ {
+  "id": 37,
+  "label": "cauliflower___healthy",
+  "plant": "cauliflower",
+  "disease": "healthy"
+ },
+ {
+  "id": 38,
+  "label": "celery___anthracnose",
+  "plant": "celery",
+  "disease": "anthracnose"
+ },
+ {
+  "id": 39,
+  "label": "celery___early blight",
+  "plant": "celery",
+  "disease": "early blight"
+ },
+ {
+  "id": 40,
+  "label": "celery___healthy",
+  "plant": "celery",
+  "disease": "healthy"
+ },
+ {
+  "id": 41,
+  "label": "cherry___healthy",
+  "plant": "cherry",
+  "disease": "healthy"
+ },
+ {
+  "id": 42,
+  "label": "cherry___powdery mildew",
+  "plant": "cherry",
+  "disease": "powdery mildew"
+ },
+ {
+  "id": 43,
+  "label": "cherry___spot",
+  "plant": "cherry",
+  "disease": "spot"
+ },
+ {
+  "id": 44,
+  "label": "citrus___canker",
+  "plant": "citrus",
+  "disease": "canker"
+ },
+ {
+  "id": 45,
+  "label": "citrus___greening disease",
+  "plant": "citrus",
+  "disease": "greening disease"
+ },
+ {
+  "id": 46,
+  "label": "coffee___berry blotch",
+  "plant": "coffee",
+  "disease": "berry blotch"
+ },
+ {
+  "id": 47,
+  "label": "coffee___healthy",
+  "plant": "coffee",
+  "disease": "healthy"
+ },
+ {
+  "id": 48,
+  "label": "coffee___rust",
+  "plant": "coffee",
+  "disease": "rust"
+ },
+ {
+  "id": 49,
+  "label": "corn___blight",
+  "plant": "corn",
+  "disease": "blight"
+ },
+ {
+  "id": 50,
+  "label": "corn___cercospora leaf spot gray leaf spot",
+  "plant": "corn",
+  "disease": "cercospora leaf spot gray leaf spot"
+ },
+ {
+  "id": 51,
+  "label": "corn___gray leaf spot",
+  "plant": "corn",
+  "disease": "gray leaf spot"
+ },
+ {
+  "id": 52,
+  "label": "corn___healthy",
+  "plant": "corn",
+  "disease": "healthy"
+ },
+ {
+  "id": 53,
+  "label": "corn___northern leaf blight",
+  "plant": "corn",
+  "disease": "northern leaf blight"
+ },
+ {
+  "id": 54,
+  "label": "corn___rust",
+  "plant": "corn",
+  "disease": "rust"
+ },
+ {
+  "id": 55,
+  "label": "corn___smut",
+  "plant": "corn",
+  "disease": "smut"
+ },
+ {
+  "id": 56,
+  "label": "cucumber___angular leaf spot",
+  "plant": "cucumber",
+  "disease": "angular leaf spot"
+ },
+ {
+  "id": 57,
+  "label": "cucumber___bacterial wilt",
+  "plant": "cucumber",
+  "disease": "bacterial wilt"
+ },
+ {
+  "id": 58,
+  "label": "cucumber___healthy",
+  "plant": "cucumber",
+  "disease": "healthy"
+ },
+ {
+  "id": 59,
+  "label": "cucumber___powdery mildew",
+  "plant": "cucumber",
+  "disease": "powdery mildew"
+ },
+ {
+  "id": 60,
+  "label": "eggplant___cercospora leaf spot",
+  "plant": "eggplant",
+  "disease": "cercospora leaf spot"
+ },
+ {
+  "id": 61,
+  "label": "eggplant___healthy",
+  "plant": "eggplant",
+  "disease": "healthy"
+ },
+ {
+  "id": 62,
+  "label": "eggplant___phomopsis fruit rot",
+  "plant": "eggplant",
+  "disease": "phomopsis fruit rot"
+ },
+ {
+  "id": 63,
+  "label": "garlic___blight",
+  "plant": "garlic",
+  "disease": "blight"
+ },
+ {
+  "id": 64,
+  "label": "garlic___healthy",
+  "plant": "garlic",
+  "disease": "healthy"
+ },
+ {
+  "id": 65,
+  "label": "garlic___rust",
+  "plant": "garlic",
+  "disease": "rust"
+ },
+ {
+  "id": 66,
+  "label": "ginger___healthy",
+  "plant": "ginger",
+  "disease": "healthy"
+ },
+ {
+  "id": 67,
+  "label": "ginger___sheath blight",
+  "plant": "ginger",
+  "disease": "sheath blight"
+ },
+ {
+  "id": 68,
+  "label": "ginger___spot",
+  "plant": "ginger",
+  "disease": "spot"
+ },
+ {
+  "id": 69,
+  "label": "grape___black rot",
+  "plant": "grape",
+  "disease": "black rot"
+ },
+ {
+  "id": 70,
+  "label": "grape___blight",
+  "plant": "grape",
+  "disease": "blight"
+ },
+ {
+  "id": 71,
+  "label": "grape___downy mildew",
+  "plant": "grape",
+  "disease": "downy mildew"
+ },
+ {
+  "id": 72,
+  "label": "grape___esca",
+  "plant": "grape",
+  "disease": "esca"
+ },
+ {
+  "id": 73,
+  "label": "grape___healthy",
+  "plant": "grape",
+  "disease": "healthy"
+ },
+ {
+  "id": 74,
+  "label": "grape___spot",
+  "plant": "grape",
+  "disease": "spot"
+ },
+ {
+  "id": 75,
+  "label": "grapevine___leafroll disease",
+  "plant": "grapevine",
+  "disease": "leafroll disease"
+ },
+ {
+  "id": 76,
+  "label": "lettuce___downy mildew",
+  "plant": "lettuce",
+  "disease": "downy mildew"
+ },
+ {
+  "id": 77,
+  "label": "lettuce___healthy",
+  "plant": "lettuce",
+  "disease": "healthy"
+ },
+ {
+  "id": 78,
+  "label": "lettuce___mosaic virus",
+  "plant": "lettuce",
+  "disease": "mosaic virus"
+ },
+ {
+  "id": 79,
+  "label": "maple___healthy",
+  "plant": "maple",
+  "disease": "healthy"
+ },
+ {
+  "id": 80,
+  "label": "maple___tar spot",
+  "plant": "maple",
+  "disease": "tar spot"
+ },
+ {
+  "id": 81,
+  "label": "orange___haunglongbing",
+  "plant": "orange",
+  "disease": "haunglongbing"
+ },
+ {
+  "id": 82,
+  "label": "peach___bacterial spot",
+  "plant": "peach",
+  "disease": "bacterial spot"
+ },
+ {
+  "id": 83,
+  "label": "peach___brown rot",
+  "plant": "peach",
+  "disease": "brown rot"
+ },
+ {
+  "id": 84,
+  "label": "peach___curl",
+  "plant": "peach",
+  "disease": "curl"
+ },
+ {
+  "id": 85,
+  "label": "peach___healthy",
+  "plant": "peach",
+  "disease": "healthy"
+ },
+ {
+  "id": 86,
+  "label": "peach___scab",
+  "plant": "peach",
+  "disease": "scab"
+ },
+ {
+  "id": 87,
+  "label": "plum___brown rot",
+  "plant": "plum",
+  "disease": "brown rot"
+ },
+ {
+  "id": 88,
+  "label": "plum___healthy",
+  "plant": "plum",
+  "disease": "healthy"
+ },
+ {
+  "id": 89,
+  "label": "plum___pocket disease",
+  "plant": "plum",
+  "disease": "pocket disease"
+ },
+ {
+  "id": 90,
+  "label": "potato___early blight",
+  "plant": "potato",
+  "disease": "early blight"
+ },
+ {
+  "id": 91,
+  "label": "potato___healthy",
+  "plant": "potato",
+  "disease": "healthy"
+ },
+ {
+  "id": 92,
+  "label": "potato___late blight",
+  "plant": "potato",
+  "disease": "late blight"
+ },
+ {
+  "id": 93,
+  "label": "raspberry___healthy",
+  "plant": "raspberry",
+  "disease": "healthy"
+ },
+ {
+  "id": 94,
+  "label": "rice___blast",
+  "plant": "rice",
+  "disease": "blast"
+ },
+ {
+  "id": 95,
+  "label": "rice___healthy",
+  "plant": "rice",
+  "disease": "healthy"
+ },
+ {
+  "id": 96,
+  "label": "rice___sheath blight",
+  "plant": "rice",
+  "disease": "sheath blight"
+ },
+ {
+  "id": 97,
+  "label": "soybean___bacterial blight",
+  "plant": "soybean",
+  "disease": "bacterial blight"
+ },
+ {
+  "id": 98,
+  "label": "soybean___bean rust",
+  "plant": "soybean",
+  "disease": "bean rust"
+ },
+ {
+  "id": 99,
+  "label": "soybean___brown spot",
+  "plant": "soybean",
+  "disease": "brown spot"
+ },
+ {
+  "id": 100,
+  "label": "soybean___downy mildew",
+  "plant": "soybean",
+  "disease": "downy mildew"
+ },
+ {
+  "id": 101,
+  "label": "soybean___frog eye leaf spot",
+  "plant": "soybean",
+  "disease": "frog eye leaf spot"
+ },
+ {
+  "id": 102,
+  "label": "soybean___healthy",
+  "plant": "soybean",
+  "disease": "healthy"
+ },
+ {
+  "id": 103,
+  "label": "soybean___mosaic",
+  "plant": "soybean",
+  "disease": "mosaic"
+ },
+ {
+  "id": 104,
+  "label": "squash___healthy",
+  "plant": "squash",
+  "disease": "healthy"
+ },
+ {
+  "id": 105,
+  "label": "squash___powdery mildew",
+  "plant": "squash",
+  "disease": "powdery mildew"
+ },
+ {
+  "id": 106,
+  "label": "strawberry___anthracnose",
+  "plant": "strawberry",
+  "disease": "anthracnose"
+ },
+ {
+  "id": 107,
+  "label": "strawberry___healthy",
+  "plant": "strawberry",
+  "disease": "healthy"
+ },
+ {
+  "id": 108,
+  "label": "strawberry___scorch",
+  "plant": "strawberry",
+  "disease": "scorch"
+ },
+ {
+  "id": 109,
+  "label": "tobacco___blue mold",
+  "plant": "tobacco",
+  "disease": "blue mold"
+ },
+ {
+  "id": 110,
+  "label": "tobacco___brown spot",
+  "plant": "tobacco",
+  "disease": "brown spot"
+ },
+ {
+  "id": 111,
+  "label": "tobacco___healthy",
+  "plant": "tobacco",
+  "disease": "healthy"
+ },
+ {
+  "id": 112,
+  "label": "tobacco___mosaic virus",
+  "plant": "tobacco",
+  "disease": "mosaic virus"
+ },
+ {
+  "id": 113,
+  "label": "tomato___bacterial leaf spot",
+  "plant": "tomato",
+  "disease": "bacterial leaf spot"
+ },
+ {
+  "id": 114,
+  "label": "tomato___bacterial spot",
+  "plant": "tomato",
+  "disease": "bacterial spot"
+ },
+ {
+  "id": 115,
+  "label": "tomato___early blight",
+  "plant": "tomato",
+  "disease": "early blight"
+ },
+ {
+  "id": 116,
+  "label": "tomato___healthy",
+  "plant": "tomato",
+  "disease": "healthy"
+ },
+ {
+  "id": 117,
+  "label": "tomato___late blight",
+  "plant": "tomato",
+  "disease": "late blight"
+ },
+ {
+  "id": 118,
+  "label": "tomato___mold",
+  "plant": "tomato",
+  "disease": "mold"
+ },
+ {
+  "id": 119,
+  "label": "tomato___mosaic virus",
+  "plant": "tomato",
+  "disease": "mosaic virus"
+ },
+ {
+  "id": 120,
+  "label": "tomato___septoria leaf spot",
+  "plant": "tomato",
+  "disease": "septoria leaf spot"
+ },
+ {
+  "id": 121,
+  "label": "tomato___spider mites",
+  "plant": "tomato",
+  "disease": "spider mites"
+ },
+ {
+  "id": 122,
+  "label": "tomato___target spot",
+  "plant": "tomato",
+  "disease": "target spot"
+ },
+ {
+  "id": 123,
+  "label": "tomato___yellow virus",
+  "plant": "tomato",
+  "disease": "yellow virus"
+ },
+ {
+  "id": 124,
+  "label": "wheat___bacterial leaf streak",
+  "plant": "wheat",
+  "disease": "bacterial leaf streak"
+ },
+ {
+  "id": 125,
+  "label": "wheat___head scab",
+  "plant": "wheat",
+  "disease": "head scab"
+ },
+ {
+  "id": 126,
+  "label": "wheat___loose smut",
+  "plant": "wheat",
+  "disease": "loose smut"
+ },
+ {
+  "id": 127,
+  "label": "wheat___powdery mildew",
+  "plant": "wheat",
+  "disease": "powdery mildew"
+ },
+ {
+  "id": 128,
+  "label": "wheat___rust",
+  "plant": "wheat",
+  "disease": "rust"
+ },
+ {
+  "id": 129,
+  "label": "wheat___septoria blotch",
+  "plant": "wheat",
+  "disease": "septoria blotch"
+ },
+ {
+  "id": 130,
+  "label": "wheat___stem rust",
+  "plant": "wheat",
+  "disease": "stem rust"
+ },
+ {
+  "id": 131,
+  "label": "wheat___stripe rust",
+  "plant": "wheat",
+  "disease": "stripe rust"
+ },
+ {
+  "id": 132,
+  "label": "zucchini___bacterial wilt",
+  "plant": "zucchini",
+  "disease": "bacterial wilt"
+ },
+ {
+  "id": 133,
+  "label": "zucchini___downy mildew",
+  "plant": "zucchini",
+  "disease": "downy mildew"
+ },
+ {
+  "id": 134,
+  "label": "zucchini___powdery mildew",
+  "plant": "zucchini",
+  "disease": "powdery mildew"
+ },
+ {
+  "id": 135,
+  "label": "zucchini___yellow mosaic virus",
+  "plant": "zucchini",
+  "disease": "yellow mosaic virus"
+ }
+]

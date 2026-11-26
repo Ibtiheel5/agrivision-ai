@@ -1,0 +1,5 @@
+outs:
+- md5: 3abfd2b53d6a7d40ddf82da4ad35bcb3
+  size: 37888658
+  hash: md5
+  path: detector.onnx

@@ -1,0 +1,106 @@
+{
+  "version": "fruit-two-stage",
+  "classes": [
+    "Apple__fresh",
+    "Apple__rotten",
+    "Banana__fresh",
+    "Banana__rotten",
+    "Bell_pepper__fresh",
+    "Bell_pepper__rotten",
+    "Carrot__fresh",
+    "Carrot__rotten",
+    "Cucumber__fresh",
+    "Cucumber__rotten",
+    "Grape__fresh",
+    "Grape__rotten",
+    "Guava__fresh",
+    "Guava__rotten",
+    "Jujube__fresh",
+    "Jujube__rotten",
+    "Mango__fresh",
+    "Mango__rotten",
+    "Orange__fresh",
+    "Orange__rotten",
+    "Pomegranate__fresh",
+    "Pomegranate__rotten",
+    "Potato__fresh",
+    "Potato__rotten",
+    "Strawberry__fresh",
+    "Strawberry__rotten",
+    "Tomato__fresh",
+    "Tomato__rotten"
+  ],
+  "healthy_classes": [
+    "Apple__fresh",
+    "Banana__fresh",
+    "Bell_pepper__fresh",
+    "Carrot__fresh",
+    "Cucumber__fresh",
+    "Grape__fresh",
+    "Guava__fresh",
+    "Jujube__fresh",
+    "Mango__fresh",
+    "Orange__fresh",
+    "Pomegranate__fresh",
+    "Potato__fresh",
+    "Strawberry__fresh",
+    "Tomato__fresh"
+  ],
+  "det_imgsz": 640,
+  "det_conf": 0.3893893893893894,
+  "det_iou": 0.5,
+  "cls_model": "convnextv2_tiny.fcmae_ft_in22k_in1k",
+  "cls_imgsz": 224,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "temperature": 0.6000000000000001,
+  "crop_pad": 0.1,
+  "alpha": 1.0,
+  "tta": false,
+  "metrics": {
+    "detector": {
+      "test_map50": 0.9697360323858062,
+      "test_map50_95": 0.7900784553602191,
+      "precision": 0.9451545555809695,
+      "recall": 0.9209621993127147,
+      "conf_best_f1": 0.3893893893893894
+    },
+    "classifier": {
+      "test": {
+        "top1": 0.9897721989772199,
+        "top3": 0.99953509995351,
+        "f1_macro": 0.9873532682830627,
+        "frais_abime_acc": 0.9953509995351,
+        "abimes_manques": 0.0037105751391465678
+      },
+      "test_tta": {
+        "top1": 0.9893072989307299,
+        "top3": 0.99953509995351,
+        "f1_macro": 0.9876580429212618,
+        "frais_abime_acc": 0.99488609948861,
+        "abimes_manques": 0.0037105751391465678
+      },
+      "temperature": 0.6000000000000001,
+      "by_src": {
+        "cls": {
+          "n": 2151,
+          "top1": 0.9897721989772199
+        }
+      }
+    },
+    "e2e": {
+      "map50": null,
+      "map50_95": null,
+      "topk": 3,
+      "alpha": 1.0
+    }
+  }
+}

@@ -10,7 +10,7 @@ import sqlite3
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import httpx
 from fastapi import APIRouter, Query
@@ -135,16 +135,26 @@ def _summary(days: int) -> Summary:
     for row in rows:
         entry = par_gov.setdefault(
             row["gov_id"],
-            {"gov_id": row["gov_id"], "gov_name": row["gov_name"], "lat": row["lat"], "lon": row["lon"],
-             "count": 0, "labels": {}},
+            {
+                "gov_id": row["gov_id"],
+                "gov_name": row["gov_name"],
+                "lat": row["lat"],
+                "lon": row["lon"],
+                "count": 0,
+                "labels": {},
+            },
         )
         entry["count"] += 1
         entry["labels"][row["label"]] = entry["labels"].get(row["label"], 0) + 1
 
     governorates = [
         GovSummary(
-            gov_id=e["gov_id"], gov_name=e["gov_name"], lat=e["lat"], lon=e["lon"], count=e["count"],
-            top=[TopLabel(label=l, count=c) for l, c in sorted(e["labels"].items(), key=lambda kv: -kv[1])[:3]],
+            gov_id=e["gov_id"],
+            gov_name=e["gov_name"],
+            lat=e["lat"],
+            lon=e["lon"],
+            count=e["count"],
+            top=[TopLabel(label=nom, count=c) for nom, c in sorted(e["labels"].items(), key=lambda kv: -kv[1])[:3]],
         )
         for e in sorted(par_gov.values(), key=lambda e: -e["count"])
     ]
@@ -155,6 +165,7 @@ def _summary(days: int) -> Summary:
 async def summary(days: int = Query(30, ge=1, le=365)) -> Summary:
     """Nombre de signalements par gouvernorat sur la période, avec les maladies dominantes."""
     return await run_in_threadpool(_summary, days)
+
 
 # ───────────────────────── Risque agronomique calculé ─────────────────────────
 # Les signalements sont rares au démarrage : une carte qui n'affiche qu'eux reste vide
@@ -241,12 +252,20 @@ def _risque_meteo() -> List["GovRisk"]:
         maxima = [float(v or 0) for v in (jours.get("temperature_2m_max") or [])][:3]
         actives = _regles_declenchees(temp, hum, vent, sum(pluies), max(maxima, default=0))
         score = min(100, sum(POINTS[c] for c in actives))
-        sortie.append(GovRisk(
-            gov_id=gov["id"], gov_name=gov["name"], lat=gov["lat"], lon=gov["lon"],
-            score=score, level=_niveau(score),
-            drivers=[LIBELLES[c] for c in actives],
-            temperature=round(temp, 1), humidity=round(hum), wind=round(vent, 1),
-        ))
+        sortie.append(
+            GovRisk(
+                gov_id=gov["id"],
+                gov_name=gov["name"],
+                lat=gov["lat"],
+                lon=gov["lon"],
+                score=score,
+                level=_niveau(score),
+                drivers=[LIBELLES[c] for c in actives],
+                temperature=round(temp, 1),
+                humidity=round(hum),
+                wind=round(vent, 1),
+            )
+        )
 
     _cache["at"], _cache["data"] = maintenant, sortie
     return sortie

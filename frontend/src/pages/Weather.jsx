@@ -48,7 +48,7 @@ export default function Weather() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(load, [settings.place]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(load, [settings.place]);  
 
   if (loading) {
     return (

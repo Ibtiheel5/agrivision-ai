@@ -88,6 +88,7 @@ def test_pas_d_accord_si_indetermine(monkeypatch, faux_fournisseurs):
 def test_mesure_en_echec_ne_casse_pas_la_conversation(monkeypatch):
     def plante(audio):
         raise RuntimeError("décodage impossible")
+
     monkeypatch.setattr(providers, "profil_voix", plante)
     r = envoyer()
     assert r.status_code == 200

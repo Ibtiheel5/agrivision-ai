@@ -42,7 +42,8 @@ STT_GEMINI_FALLBACK = _clean(os.getenv("STT_GEMINI_FALLBACK")) or "gemini-3.6-fl
 STT_BEAM_SIZE = int(os.getenv("STT_BEAM_SIZE", "1"))  # 1 = le plus rapide ; 3 à 5 = plus juste, plus lent
 # Vocabulaire soufflé au modèle local : oriente le décodage vers le domaine agricole.
 STT_PROMPT = _clean(os.getenv("STT_PROMPT")) or (
-    "حديث بالدارجة التونسية على النباتات و الفلاحة : ورقة، نبتة، مرض، صفرا، بقع، سقي، سماد، دوا، طماطم، فلفل، دالية، زيتون."
+    "حديث بالدارجة التونسية على النباتات و الفلاحة : ورقة، نبتة، مرض، "
+    "صفرا، بقع، سقي، سماد، دوا، طماطم، فلفل، دالية، زيتون."
 )
 _stt_gemini_model = None  # modèle réellement accepté par l'API (déterminé au premier appel)
 STT_THREADS = int(os.getenv("STT_THREADS", "0"))  # 0 = tous les coeurs
@@ -100,7 +101,7 @@ def _attente(essai: int, retry_after) -> float:
             return min(20.0, max(0.0, float(retry_after)))
     except (TypeError, ValueError):
         pass
-    base = min(20.0, GEMINI_RETRY_BASE * (2 ** essai))
+    base = min(20.0, GEMINI_RETRY_BASE * (2**essai))
     return base + random.uniform(0, base * 0.3)
 
 
@@ -129,7 +130,11 @@ def _post_gemini(url: str, headers: dict, body: dict, timeout: float = 60.0):
         pause = _attente(essai, reponse.headers.get("retry-after"))
         logger.warning(
             "Gemini %s (essai %d/%d) : %s — nouvel essai dans %.1f s.",
-            reponse.status_code, essai + 1, GEMINI_RETRIES, _detail_erreur(reponse), pause,
+            reponse.status_code,
+            essai + 1,
+            GEMINI_RETRIES,
+            _detail_erreur(reponse),
+            pause,
         )
         time.sleep(pause)
     return reponse
@@ -220,8 +225,6 @@ def _transcribe_gemini(samples) -> str:
     """Transcription par Gemini : bien meilleure en derja que Whisper, et rien à calculer en local."""
     import base64
 
-    import httpx
-
     global _stt_gemini_model
     key = _clean(os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"))
     if not key:
@@ -294,7 +297,7 @@ def _f0_trame(trame, rate: int):
     norme = float(np.dot(trame, trame))
     if norme <= 1e-9:
         return None, 0.0
-    corr = np.correlate(trame, trame, mode="full")[len(trame) - 1:]
+    corr = np.correlate(trame, trame, mode="full")[len(trame) - 1 :]
     lag_min = max(2, int(rate / _F0_MAX))
     lag_max = min(len(corr) - 2, int(rate / _F0_MIN))
     if lag_max <= lag_min:
@@ -333,10 +336,10 @@ def profil_voix(audio: bytes, rate: int = 16000) -> dict:
         return vide
 
     taille, pas = int(0.04 * rate), int(0.02 * rate)
-    trames = [samples[d:d + taille] for d in range(0, len(samples) - taille, pas)]
+    trames = [samples[d : d + taille] for d in range(0, len(samples) - taille, pas)]
     if not trames:
         return vide
-    energies = np.array([float(np.sqrt(np.mean(t ** 2))) for t in trames])
+    energies = np.array([float(np.sqrt(np.mean(t**2))) for t in trames])
     seuil = max(0.02 * float(energies.max()), 1e-4)  # écarte les silences
 
     hauteurs = []
@@ -392,8 +395,6 @@ def transcribe(audio: bytes) -> str:
 # ---------- LLM ----------
 def generate(system: str, messages: List[Dict[str, str]]) -> str:
     if LLM_PROVIDER == "gemini":
-        import httpx
-
         key = _clean(os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"))
         if not key:
             raise RuntimeError("GEMINI_API_KEY manquante (clé à créer sur aistudio.google.com/apikey)")
@@ -502,8 +503,6 @@ async def _synthesize_edge(text: str) -> bytes:
 def _synthesize_gemini(text: str) -> bytes:
     """Synthèse Gemini : la consigne de style demande explicitement un accent tunisien. Renvoie un WAV."""
     import base64
-
-    import httpx
 
     key = _clean(os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"))
     if not key:

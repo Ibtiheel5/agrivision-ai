@@ -24,7 +24,7 @@ export default function DiseaseDetail({ src, result, index, clientMs, conf, onCo
           {t("confidence")} <ConfBadge value={det.confidence} />
         </div>
         {det.confidence < lowConf && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">⚠️ {t("low")}</p>}
-        {det.fallback_full_image && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">⚠️ Aucun fruit isolé détecté : l'image entière a été analysée.</p>}
+        {det.fallback_full_image && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">⚠️ Aucun fruit isolé détecté : l’image entière a été analysée.</p>}
         <div className="mt-5">
           <ProbabilityBars scores={result.class_scores} detections={result.detections} />
         </div>

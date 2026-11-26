@@ -49,16 +49,21 @@ def test_weather_maps_codes_and_builds_alerts(client, monkeypatch):
     assert body["days"][2]["rain"] == 0.0  # None de l'API ramené à 0
 
     titres = [a["title"] for a in body["alerts"]]
-    assert "Risque de mildiou élevé" in titres        # 85 % d'humidité à 18 °C
-    assert "Coup de chaleur attendu" in titres        # 39,2 °C prévus
+    assert "Risque de mildiou élevé" in titres  # 85 % d'humidité à 18 °C
+    assert "Coup de chaleur attendu" in titres  # 39,2 °C prévus
     assert all(a["level"] in {"info", "warn", "danger"} for a in body["alerts"])
 
 
 def test_weather_dry_and_calm_gives_spray_window(client, monkeypatch):
     sec = {
         "current": {"temperature_2m": 31.0, "relative_humidity_2m": 30, "wind_speed_10m": 6.0, "weather_code": 0},
-        "daily": {"time": ["2026-11-23"], "temperature_2m_max": [32.0], "temperature_2m_min": [18.0],
-                  "precipitation_sum": [0.0], "weather_code": [0]},
+        "daily": {
+            "time": ["2026-11-23"],
+            "temperature_2m_max": [32.0],
+            "temperature_2m_min": [18.0],
+            "precipitation_sum": [0.0],
+            "weather_code": [0],
+        },
     }
     monkeypatch.setattr(weather, "fetch", lambda lat, lon: sec)
     titres = [a["title"] for a in client.get("/weather").json()["alerts"]]
@@ -69,8 +74,13 @@ def test_weather_dry_and_calm_gives_spray_window(client, monkeypatch):
 def test_weather_strong_wind_blocks_spraying(client, monkeypatch):
     venteux = {
         "current": {"temperature_2m": 24.0, "relative_humidity_2m": 50, "wind_speed_10m": 27.0, "weather_code": 2},
-        "daily": {"time": ["2026-11-23"], "temperature_2m_max": [25.0], "temperature_2m_min": [15.0],
-                  "precipitation_sum": [0.0], "weather_code": [2]},
+        "daily": {
+            "time": ["2026-11-23"],
+            "temperature_2m_max": [25.0],
+            "temperature_2m_min": [15.0],
+            "precipitation_sum": [0.0],
+            "weather_code": [2],
+        },
     }
     monkeypatch.setattr(weather, "fetch", lambda lat, lon: venteux)
     titres = [a["title"] for a in client.get("/weather").json()["alerts"]]
@@ -92,7 +102,9 @@ def test_weather_service_down(client, monkeypatch):
 
 # ---------- carte des risques ----------
 def test_report_rounds_position_and_finds_governorate(client):
-    body = client.post("/risk-map/report", json={"label": "Tomato leaf late blight", "lat": 36.4567, "lon": 10.7412}).json()
+    body = client.post(
+        "/risk-map/report", json={"label": "Tomato leaf late blight", "lat": 36.4567, "lon": 10.7412}
+    ).json()
     assert body == {"stored": True, "gov_id": "nabeul", "gov_name": "Nabeul"}
 
     with risk_map.connect() as conn:

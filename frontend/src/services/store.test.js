@@ -88,7 +88,7 @@ test("plantes et conversations : écriture, lecture, suppression", async () => {
 
 test("sans IndexedDB, l'application démarre quand même", async () => {
   const vrai = globalThis.indexedDB;
-  // eslint-disable-next-line no-global-assign
+   
   globalThis.indexedDB = undefined;
   const { store, history } = await freshModules();
   expect(await store.initStore()).toBe(false);

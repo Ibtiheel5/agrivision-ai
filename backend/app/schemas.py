@@ -20,7 +20,6 @@ class Detection(BaseModel):
     confidence: float = Field(..., ge=0.0, le=1.0)
     box: Box
 
-
     plant: Optional[str] = None
     disease: Optional[str] = None
     source: Optional[str] = None
@@ -35,6 +34,7 @@ class Alternative(BaseModel):
 
 class LeafResult(BaseModel):
     """Une feuille detectee : boite + top-3 du classifieur."""
+
     model_config = ConfigDict(extra="forbid")
     box: Box
     leaf_confidence: float
@@ -58,7 +58,6 @@ class PredictResponse(BaseModel):
     iou_threshold: float
     server_latency_ms: float = Field(..., description="Temps d'inférence serveur")
     model_version: str
-
 
     status: str = "ok"
     leaves: Optional[List[LeafResult]] = None
@@ -121,5 +120,6 @@ class ModelMetadata(BaseModel):
 
 class ErrorResponse(BaseModel):
     detail: str
+
 
 Detection.model_rebuild()

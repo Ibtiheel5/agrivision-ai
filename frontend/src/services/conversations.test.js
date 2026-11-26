@@ -4,7 +4,9 @@ import {
   removeConversation, saveConversation, titleOf,
 } from "./conversations";
 
-beforeEach(() => localStorage.clear());
+beforeEach(async () => {
+  await clearConversations();
+});
 
 test("enregistre, relit et classe par date de mise à jour", () => {
   saveConversation({ id: "a", messages: [{ role: "user", content: "première" }] });
@@ -51,16 +53,10 @@ test("suppression unitaire et globale", () => {
   expect(listConversations()).toHaveLength(0);
 });
 
-test("ne garde que les 20 dernières conversations", () => {
+test("conserve toutes les conversations, sans limite à 20", () => {
   for (let i = 0; i < 25; i++) saveConversation({ id: `c${i}`, messages: [{ role: "user", content: `m${i}` }] });
-  expect(listConversations()).toHaveLength(20);
-  expect(getConversation("c24")).not.toBeNull();
-  expect(getConversation("c0")).toBeNull();
-});
-
-test("localStorage corrompu : liste vide au lieu d'une erreur", () => {
-  localStorage.setItem("agrivision.chats.v1", "{pas du json");
-  expect(listConversations()).toEqual([]);
+  expect(listConversations()).toHaveLength(25);
+  expect(getConversation("c0").title).toBe("m0");
 });
 
 test("identifiants uniques", () => {

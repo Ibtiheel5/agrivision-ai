@@ -122,6 +122,10 @@ def test_stt_uses_faster_whisper(monkeypatch):
 
     monkeypatch.setitem(sys.modules, "faster_whisper", types.SimpleNamespace(WhisperModel=FakeModel))
     importlib.reload(providers)
+    # Un backend/.env local ne doit pas influencer le test (il peut choisir « gemini »).
+    providers.STT_PROVIDER = "faster-whisper"
+    providers.STT_COMPUTE = "int8"
+    providers.STT_BEAM_SIZE = 1
     providers.STT_MODEL = "small"  # nom court : pas de dossier local requis
     providers._decode_audio = lambda data, rate=16000: np.zeros(16000, dtype=np.float32)
     try:
@@ -138,17 +142,13 @@ def test_voice_chat_uses_history(fake_providers):
     import json
 
     hist = json.dumps([{"role": "user", "content": "salut"}, {"role": "assistant", "content": "ahla"}])
-    r = client.post(
-        "/voice-chat", files={"audio": ("a.webm", b"x", "audio/webm")}, data={"history": hist}
-    )
+    r = client.post("/voice-chat", files={"audio": ("a.webm", b"x", "audio/webm")}, data={"history": hist})
     assert r.status_code == 200
     assert [m["content"] for m in fake_providers["messages"][:2]] == ["salut", "ahla"]
 
 
 def test_voice_chat_bad_history_is_ignored(fake_providers):
-    r = client.post(
-        "/voice-chat", files={"audio": ("a.webm", b"x", "audio/webm")}, data={"history": "{pas du json"}
-    )
+    r = client.post("/voice-chat", files={"audio": ("a.webm", b"x", "audio/webm")}, data={"history": "{pas du json"})
     assert r.status_code == 200 and len(fake_providers["messages"]) == 1
 
 
@@ -192,7 +192,10 @@ def test_gemini_provider_request_and_parse(monkeypatch):
     monkeypatch.setattr(providers, "LLM_PROVIDER", "gemini")
     monkeypatch.setattr(providers, "LLM_MODEL", "gemini-3.6-flash")
     monkeypatch.setenv("GEMINI_API_KEY", "k-test")
-    out = REAL_GENERATE("SYS", [{"role": "user", "content": "a"}, {"role": "assistant", "content": "b"}, {"role": "user", "content": "c"}])
+    out = REAL_GENERATE(
+        "SYS",
+        [{"role": "user", "content": "a"}, {"role": "assistant", "content": "b"}, {"role": "user", "content": "c"}],
+    )
     assert out == "مرحبا بيك"
     assert seen["url"].endswith("/models/gemini-3.6-flash:generateContent")
     assert seen["headers"]["x-goog-api-key"] == "k-test"
@@ -208,7 +211,9 @@ def test_gemini_errors_are_explicit(monkeypatch):
     monkeypatch.setattr(httpx, "post", lambda *a, **k: _FakeResp(400, {"error": "API key not valid"}))
     with pytest.raises(RuntimeError, match="Gemini 400"):
         REAL_GENERATE("s", [{"role": "user", "content": "x"}])
-    monkeypatch.setattr(httpx, "post", lambda *a, **k: _FakeResp(200, {"candidates": [], "promptFeedback": {"blockReason": "SAFETY"}}))
+    monkeypatch.setattr(
+        httpx, "post", lambda *a, **k: _FakeResp(200, {"candidates": [], "promptFeedback": {"blockReason": "SAFETY"}})
+    )
     with pytest.raises(RuntimeError, match="vide ou bloquée"):
         REAL_GENERATE("s", [{"role": "user", "content": "x"}])
     monkeypatch.delenv("GEMINI_API_KEY")
@@ -248,12 +253,15 @@ def test_gemini_key_from_env_is_cleaned(monkeypatch):
     seen = {}
     monkeypatch.setattr(providers, "LLM_PROVIDER", "gemini")
     monkeypatch.setenv("GEMINI_API_KEY", '"AQ.avec-guillemets"')
-    monkeypatch.setattr(httpx, "post", lambda url, headers=None, json=None, timeout=None: (
-        seen.update(headers=headers) or _FakeResp(200, {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]})
-    ))
+    monkeypatch.setattr(
+        httpx,
+        "post",
+        lambda url, headers=None, json=None, timeout=None: (
+            seen.update(headers=headers) or _FakeResp(200, {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]})
+        ),
+    )
     REAL_GENERATE("s", [{"role": "user", "content": "x"}])
     assert seen["headers"]["x-goog-api-key"] == "AQ.avec-guillemets"
-
 
 
 def test_decode_audio_real_wav():
@@ -348,10 +356,14 @@ def test_gemini_numeric_thinking_uses_legacy_budget(monkeypatch):
     import httpx
 
     calls = []
-    monkeypatch.setattr(httpx, "post", lambda url, headers=None, json=None, timeout=None: (
-        calls.append(copy.deepcopy(json))
-        or _FakeResp(200, {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]})
-    ))
+    monkeypatch.setattr(
+        httpx,
+        "post",
+        lambda url, headers=None, json=None, timeout=None: (
+            calls.append(copy.deepcopy(json))
+            or _FakeResp(200, {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]})
+        ),
+    )
     monkeypatch.setattr(providers, "LLM_PROVIDER", "gemini")
     monkeypatch.setattr(providers, "GEMINI_THINKING", "0")  # ancien paramètre Gemini 2.5
     monkeypatch.setattr(providers, "_thinking_supported", True)
@@ -364,17 +376,20 @@ def test_gemini_thinking_can_be_disabled(monkeypatch):
     import httpx
 
     calls = []
-    monkeypatch.setattr(httpx, "post", lambda url, headers=None, json=None, timeout=None: (
-        calls.append(copy.deepcopy(json))
-        or _FakeResp(200, {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]})
-    ))
+    monkeypatch.setattr(
+        httpx,
+        "post",
+        lambda url, headers=None, json=None, timeout=None: (
+            calls.append(copy.deepcopy(json))
+            or _FakeResp(200, {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]})
+        ),
+    )
     monkeypatch.setattr(providers, "LLM_PROVIDER", "gemini")
     monkeypatch.setattr(providers, "GEMINI_THINKING", "")  # on laisse le modèle décider
     monkeypatch.setattr(providers, "_thinking_supported", True)
     monkeypatch.setenv("GEMINI_API_KEY", "k")
     REAL_GENERATE("s", [{"role": "user", "content": "x"}])
     assert "thinkingConfig" not in calls[0]["generationConfig"]
-
 
 
 def test_gemini_tts_request_and_wav(monkeypatch):
@@ -388,15 +403,21 @@ def test_gemini_tts_request_and_wav(monkeypatch):
 
     def fake_post(url, headers=None, json=None, timeout=None):
         seen.update(url=url, headers=headers, body=json)
-        return _FakeResp(200, {
-            "steps": [
-                {"type": "other", "content": [{"type": "text", "data": "ignore"}]},
-                {"type": "model_output", "content": [
-                    {"type": "text", "data": "ignore"},
-                    {"type": "audio", "data": base64.b64encode(wav).decode()},
-                ]},
-            ]
-        })
+        return _FakeResp(
+            200,
+            {
+                "steps": [
+                    {"type": "other", "content": [{"type": "text", "data": "ignore"}]},
+                    {
+                        "type": "model_output",
+                        "content": [
+                            {"type": "text", "data": "ignore"},
+                            {"type": "audio", "data": base64.b64encode(wav).decode()},
+                        ],
+                    },
+                ]
+            },
+        )
 
     monkeypatch.setattr(httpx, "post", fake_post)
     monkeypatch.setattr(providers, "TTS_PROVIDER", "gemini")
@@ -516,13 +537,16 @@ def test_gemini_stt_empty_answer(monkeypatch):
 
 
 def test_chat_passes_recent_analyses(fake_providers):
-    r = client.post("/chat", json={
-        "message": "el maradh elli 9ablt chnowa kan ?",
-        "recent_analyses": [
-            {"label": "Tomato_Late_blight", "confidence": 0.81, "when": "22 novembre"},
-            {"label": "Corn_Rust", "confidence": 0.44},
-        ],
-    })
+    r = client.post(
+        "/chat",
+        json={
+            "message": "el maradh elli 9ablt chnowa kan ?",
+            "recent_analyses": [
+                {"label": "Tomato_Late_blight", "confidence": 0.81, "when": "22 novembre"},
+                {"label": "Corn_Rust", "confidence": 0.44},
+            ],
+        },
+    )
     assert r.status_code == 200
     sys_prompt = fake_providers["system"]
     assert "Tomato_Late_blight (81 %), le 22 novembre" in sys_prompt
@@ -555,9 +579,7 @@ def test_voice_chat_accepts_recent_analyses(fake_providers):
 
 
 def test_voice_chat_bad_analyses_json_is_ignored(fake_providers):
-    r = client.post(
-        "/voice-chat", files={"audio": ("a.webm", b"x", "audio/webm")}, data={"recent_analyses": "{oops"}
-    )
+    r = client.post("/voice-chat", files={"audio": ("a.webm", b"x", "audio/webm")}, data={"recent_analyses": "{oops"})
     assert r.status_code == 200
     assert "Analyses déjà faites" not in fake_providers["system"]
 

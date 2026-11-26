@@ -24,10 +24,10 @@ export default function Analyse() {
   if (!item) {
     return (
       <section className="rounded-2xl border border-line bg-surface p-5 text-center">
-        <p className="text-sm text-ink-600">Cette analyse n'est plus enregistrée sur cet appareil.</p>
+        <p className="text-sm text-ink-600">Cette analyse n’est plus enregistrée sur cet appareil.</p>
         <Link to="/history" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand-500 px-4 text-sm font-semibold text-white">
           <Icon name="history" className="h-4 w-4" />
-          Retour à l'historique
+          Retour à l’historique
         </Link>
       </section>
     );

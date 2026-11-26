@@ -1,9 +1,13 @@
 """Profil de voix : mesure de la hauteur (F0) et étiquette indicative."""
+
 import sys
+from pathlib import Path
+
 import numpy as np
 import pytest
-sys.path.insert(0, "/home/claude/derja_voice/backend")
-from app import providers
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from app import providers  # noqa: E402
 
 
 def voix(f0, secondes=1.5, rate=16000, bruit=0.0, harmoniques=6):
@@ -23,8 +27,9 @@ def sans_decodage(monkeypatch):
     monkeypatch.setattr(providers, "_decode_audio", lambda data, rate=16000: data)
 
 
-@pytest.mark.parametrize("f0,attendu", [(100, "homme"), (120, "homme"), (145, "homme"),
-                                        (195, "femme"), (210, "femme"), (240, "femme")])
+@pytest.mark.parametrize(
+    "f0,attendu", [(100, "homme"), (120, "homme"), (145, "homme"), (195, "femme"), (210, "femme"), (240, "femme")]
+)
 def test_classe_les_hauteurs_typiques(f0, attendu):
     p = providers.profil_voix(voix(f0))
     assert p["genre"] == attendu, p

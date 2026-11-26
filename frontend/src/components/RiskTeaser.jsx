@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Icon from "./Icon";
 import { useLang } from "../LangContext";
 import { getJSON } from "../lib/assistant";
 import { labelFr } from "../data/diseases";

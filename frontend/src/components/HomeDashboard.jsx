@@ -212,6 +212,8 @@ export default function HomeDashboard({ query = "" }) {
   const lieu = weather?.place?.name ?? "";
   const alerte = weather?.alerts?.find((a) => a.level === "danger") ?? null;
 
+  // reloadTick force la relecture de l'historique au clic sur « Actualiser ».
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const analyses = useMemo(() => loadHistory(), [reloadTick]);
 
   const vedettes = useMemo(() => {

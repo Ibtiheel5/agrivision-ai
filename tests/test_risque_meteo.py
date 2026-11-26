@@ -1,7 +1,10 @@
 """Couche « risque calculé » de la carte : règles agronomiques, cache, et tolérance aux pannes."""
-import sys, time
+
+import sys
+import time
 from pathlib import Path
 import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from app.routers import risk_map  # noqa: E402
 from app.tunisia import GOVERNORATES  # noqa: E402
@@ -23,9 +26,11 @@ def cache_vide():
 
 def patch(monkeypatch, blocs):
     appels = {"n": 0}
+
     def faux():
         appels["n"] += 1
         return blocs
+
     monkeypatch.setattr(risk_map, "_fetch_bulk", faux)
     return appels
 
@@ -37,13 +42,16 @@ def test_un_gouvernorat_par_entree(monkeypatch):
     assert [r.gov_id for r in res] == [g["id"] for g in GOVERNORATES]
 
 
-@pytest.mark.parametrize("args,attendu", [
-    (dict(temp=18, hum=85), "mildiou"),
-    (dict(temp=25, hum=60), "oidium"),
-    (dict(temp=18, hum=75, pluies=(3, 3, 0)), "feuillage"),
-    (dict(maxima=(39, 30, 30)), "chaleur"),
-    (dict(vent=25), "vent"),
-])
+@pytest.mark.parametrize(
+    "args,attendu",
+    [
+        (dict(temp=18, hum=85), "mildiou"),
+        (dict(temp=25, hum=60), "oidium"),
+        (dict(temp=18, hum=75, pluies=(3, 3, 0)), "feuillage"),
+        (dict(maxima=(39, 30, 30)), "chaleur"),
+        (dict(vent=25), "vent"),
+    ],
+)
 def test_chaque_regle_se_declenche(monkeypatch, args, attendu):
     patch(monkeypatch, [bloc(**args) for _ in GOVERNORATES])
     r = risk_map._risque_meteo()[0]
@@ -59,13 +67,13 @@ def test_mildiou_et_feuillage_sexcluent(monkeypatch):
 
 
 def test_niveaux(monkeypatch):
-    patch(monkeypatch, [bloc(temp=18, hum=85) for _ in GOVERNORATES])   # 45
+    patch(monkeypatch, [bloc(temp=18, hum=85) for _ in GOVERNORATES])  # 45
     assert risk_map._risque_meteo()[0].level == "danger"
     risk_map._cache["data"] = None
-    patch(monkeypatch, [bloc(temp=25, hum=60) for _ in GOVERNORATES])   # 20
+    patch(monkeypatch, [bloc(temp=25, hum=60) for _ in GOVERNORATES])  # 20
     assert risk_map._risque_meteo()[0].level == "warn"
     risk_map._cache["data"] = None
-    patch(monkeypatch, [bloc(temp=15, hum=30) for _ in GOVERNORATES])   # 0
+    patch(monkeypatch, [bloc(temp=15, hum=30) for _ in GOVERNORATES])  # 0
     assert risk_map._risque_meteo()[0].level == "calme"
 
 

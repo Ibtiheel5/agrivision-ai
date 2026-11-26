@@ -50,14 +50,15 @@ def _optional_router(name: str):
 
 
 advice = _optional_router("advice")
-chat = _optional_router("chat")          # assistant : /chat, /voice-chat, /tts
+chat = _optional_router("chat")  # assistant : /chat, /voice-chat, /tts
 risk_map = _optional_router("risk_map")
 weather = _optional_router("weather")
 
 DEFAULT_MODEL_DIR = Path(__file__).resolve().parents[2] / "models"
 MODEL_DIR = Path(os.getenv("MODEL_DIR", str(DEFAULT_MODEL_DIR)))
 MODEL_FILE = os.getenv("MODEL_FILE", "best.onnx")
-# Modèle fruits / légumes : sous-dossier « fruit » (fruit_detector.onnx, classifier.onnx, classes.txt, pipeline_config.json)
+# Modèle fruits / légumes : sous-dossier « fruit »
+# (fruit_detector.onnx, classifier.onnx, classes.txt, pipeline_config.json)
 FRUIT_DIR = Path(os.getenv("FRUIT_MODEL_DIR", str(MODEL_DIR / "fruit")))
 BENCHMARK_PATH = Path(os.getenv("BENCHMARK_PATH", str(MODEL_DIR / "benchmark_local.json")))
 MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", "10"))
@@ -102,6 +103,7 @@ def warmup_stt() -> None:
     """
     try:
         from .providers import warmup
+
         warmup()
         logger.info("Moteur vocal préchauffé")
     except Exception as exc:  # noqa: BLE001
@@ -132,7 +134,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(
     title="AgriVision IA API",
     description="Détection de maladies foliaires (YOLO11 + ONNX Runtime), qualité des fruits / légumes "
-                "(détecteur + classifieur) et assistant agricole en derja.",
+    "(détecteur + classifieur) et assistant agricole en derja.",
     version="1.2.0",
     lifespan=lifespan,
 )
@@ -146,8 +148,12 @@ for _r in (advice, chat, risk_map, weather):
 # Récapitulatif au démarrage : on voit tout de suite ce qui manque, sans fouiller dans /openapi.json.
 logger.info(
     "Routeurs actifs : %s",
-    ", ".join(n for n, m in (("advice", advice), ("chat", chat), ("risk_map", risk_map), ("weather", weather))
-              if m is not None and hasattr(m, "router")) or "aucun",
+    ", ".join(
+        n
+        for n, m in (("advice", advice), ("chat", chat), ("risk_map", risk_map), ("weather", weather))
+        if m is not None and hasattr(m, "router")
+    )
+    or "aucun",
 )
 
 

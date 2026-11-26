@@ -5,3 +5,5 @@ onnxruntime==1.20.1
 numpy>=1.26,<2.2
 pillow>=10.4
 pydantic>=2.8
+
+prometheus-client>=0.20

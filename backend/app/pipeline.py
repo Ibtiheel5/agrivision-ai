@@ -56,8 +56,10 @@ def _nms(boxes: np.ndarray, scores: np.ndarray, iou_thr: float) -> List[int]:
         if order.size == 1:
             break
         rest = order[1:]
-        x1 = np.maximum(boxes[i, 0], boxes[rest, 0]); y1 = np.maximum(boxes[i, 1], boxes[rest, 1])
-        x2 = np.minimum(boxes[i, 2], boxes[rest, 2]); y2 = np.minimum(boxes[i, 3], boxes[rest, 3])
+        x1 = np.maximum(boxes[i, 0], boxes[rest, 0])
+        y1 = np.maximum(boxes[i, 1], boxes[rest, 1])
+        x2 = np.minimum(boxes[i, 2], boxes[rest, 2])
+        y2 = np.minimum(boxes[i, 3], boxes[rest, 3])
         inter = np.clip(x2 - x1, 0, None) * np.clip(y2 - y1, 0, None)
         a = (boxes[i, 2] - boxes[i, 0]) * (boxes[i, 3] - boxes[i, 1])
         b = (boxes[rest, 2] - boxes[rest, 0]) * (boxes[rest, 3] - boxes[rest, 1])
@@ -65,7 +67,9 @@ def _nms(boxes: np.ndarray, scores: np.ndarray, iou_thr: float) -> List[int]:
     return keep
 
 
-def _decode_leaves(output, ratio, pad, orig_size, conf_thr, iou_thr, max_det) -> List[Tuple[float, float, float, float, float]]:
+def _decode_leaves(
+    output, ratio, pad, orig_size, conf_thr, iou_thr, max_det
+) -> List[Tuple[float, float, float, float, float]]:
     """Sortie YOLO (1, 4+nc, N) -> [(x1, y1, x2, y2, conf)] dans l'image d'origine (NMS sans distinction de classe)."""
     pred = np.asarray(output)[0].T
     conf = pred[:, 4:].max(axis=1)
@@ -73,7 +77,9 @@ def _decode_leaves(output, ratio, pad, orig_size, conf_thr, iou_thr, max_det) ->
     if not m.any():
         return []
     b, s = pred[m, :4], conf[m]
-    xyxy = np.stack([b[:, 0] - b[:, 2] / 2, b[:, 1] - b[:, 3] / 2, b[:, 0] + b[:, 2] / 2, b[:, 1] + b[:, 3] / 2], axis=1)
+    xyxy = np.stack(
+        [b[:, 0] - b[:, 2] / 2, b[:, 1] - b[:, 3] / 2, b[:, 0] + b[:, 2] / 2, b[:, 1] + b[:, 3] / 2], axis=1
+    )
     xyxy[:, [0, 2]] = (xyxy[:, [0, 2]] - pad[0]) / ratio
     xyxy[:, [1, 3]] = (xyxy[:, [1, 3]] - pad[1]) / ratio
     w, h = orig_size
@@ -115,12 +121,17 @@ class TwoStagePipeline:
         self.input_hw = (int(h) if isinstance(h, int) else 640, int(w) if isinstance(w, int) else 640)
         n_out = self.cls.get_outputs()[0].shape[1]
         if isinstance(n_out, int) and n_out != len(self.classes):
-            raise ModelNotLoadedError(f"Incoherence : classifieur a {n_out} sorties, classes.json en a {len(self.classes)}")
+            raise ModelNotLoadedError(
+                f"Incoherence : classifieur a {n_out} sorties, classes.json en a {len(self.classes)}"
+            )
 
         metrics = self._json("metrics.json")
         test = metrics.get("test", {})
         self.version = f"{cfg.get('model', 'v5')}+leaf"
-        self.conf_default, self.iou_default = self.accept, self.det_iou      # 'conf' de l'API = seuil de rejet du classifieur
+        self.conf_default, self.iou_default = (
+            self.accept,
+            self.det_iou,
+        )  # 'conf' de l'API = seuil de rejet du classifieur
         self.metadata = {
             "name": "AgriVision IA v5",
             "architecture": f"detecteur de feuilles (YOLO11) + classifieur ({cfg.get('backbone', 'CNN')})",
@@ -133,7 +144,13 @@ class TwoStagePipeline:
                 "detecteur": str(det_cfg.get("metrics", {}).get("mAP50", "n/a")),
             },
         }
-        logger.info("Pipeline charge : %d classes, imgsz=%d, accept=%.2f, gpu=%s", len(self.classes), self.img, self.accept, self.gpu)
+        logger.info(
+            "Pipeline charge : %d classes, imgsz=%d, accept=%.2f, gpu=%s",
+            len(self.classes),
+            self.img,
+            self.accept,
+            self.gpu,
+        )
 
     def _json(self, name: str) -> Dict:
         p = self.dir / name
@@ -153,16 +170,22 @@ class TwoStagePipeline:
 
     # ------------------------------------------------------------------ inference
     def _classify(self, imgs: List[Image.Image]) -> np.ndarray:
-        batch = np.stack([
-            np.transpose(np.asarray(im.resize((self.img, self.img), Image.BILINEAR), dtype=np.float32) / 255.0, (2, 0, 1))
-            for im in imgs
-        ])
+        batch = np.stack(
+            [
+                np.transpose(
+                    np.asarray(im.resize((self.img, self.img), Image.BILINEAR), dtype=np.float32) / 255.0, (2, 0, 1)
+                )
+                for im in imgs
+            ]
+        )
         return self.cls.run(None, {self.cls_in: np.ascontiguousarray(batch)})[0]
 
     def _crop(self, img: Image.Image, box) -> Image.Image:
         x1, y1, x2, y2, _ = box
         pw, ph = (x2 - x1) * self.crop_pad, (y2 - y1) * self.crop_pad
-        return img.crop((int(max(0, x1 - pw)), int(max(0, y1 - ph)), int(min(img.size[0], x2 + pw)), int(min(img.size[1], y2 + ph))))
+        return img.crop(
+            (int(max(0, x1 - pw)), int(max(0, y1 - ph)), int(min(img.size[0], x2 + pw)), int(min(img.size[1], y2 + ph)))
+        )
 
     def _leaf(self, box, probs: np.ndarray, accept: float, source: str) -> Dict:
         order = np.argsort(-probs)[: self.topk]
@@ -189,26 +212,44 @@ class TwoStagePipeline:
 
         tensor, ratio, pad = _letterbox(img, self.input_hw)
         out = self.det.run(None, {self.det_in: tensor})[0]
-        boxes = [b for b in _decode_leaves(out, ratio, pad, (W, H), self.leaf_conf, iou, self.max_leaves)
-                 if min(b[2] - b[0], b[3] - b[1]) >= self.min_side_px]
+        boxes = [
+            b
+            for b in _decode_leaves(out, ratio, pad, (W, H), self.leaf_conf, iou, self.max_leaves)
+            if min(b[2] - b[0], b[3] - b[1]) >= self.min_side_px
+        ]
 
-        probs = self._classify([self._crop(img, b) for b in boxes] + [img])   # le dernier = image entiere
+        probs = self._classify([self._crop(img, b) for b in boxes] + [img])  # le dernier = image entiere
         whole = probs[-1]
         if boxes:
             leaves = [self._leaf(b, p, accept, "crop") for b, p in zip(boxes, probs[:-1])]
             # une seule feuille mal cadree par le detecteur : l'image entiere peut etre plus parlante
             if len(leaves) == 1 and not leaves[0]["recognized"] and whole.max() >= accept:
-                leaves[0] = {**self._leaf((*[leaves[0]["box"][k] for k in ("x1", "y1", "x2", "y2")], leaves[0]["leaf_confidence"]),
-                                          whole, accept, "image")}
-        else:                                                                  # aucune feuille detectee : on classe l'image entiere
+                leaves[0] = {
+                    **self._leaf(
+                        (*[leaves[0]["box"][k] for k in ("x1", "y1", "x2", "y2")], leaves[0]["leaf_confidence"]),
+                        whole,
+                        accept,
+                        "image",
+                    )
+                }
+        else:  # aucune feuille detectee : on classe l'image entiere
             leaves = [self._leaf((0.0, 0.0, float(W), float(H), 0.0), whole, accept, "image")]
         latency = (time.perf_counter() - t0) * 1000
 
         dets, scores = [], {}
         for lf in leaves:
             if lf["recognized"]:
-                dets.append({"class_id": lf["class_id"], "label": lf["label"], "confidence": lf["confidence"], "box": lf["box"],
-                             "plant": lf["plant"], "disease": lf["disease"], "source": lf["source"]})
+                dets.append(
+                    {
+                        "class_id": lf["class_id"],
+                        "label": lf["label"],
+                        "confidence": lf["confidence"],
+                        "box": lf["box"],
+                        "plant": lf["plant"],
+                        "disease": lf["disease"],
+                        "source": lf["source"],
+                    }
+                )
                 scores[lf["label"]] = max(scores.get(lf["label"], 0.0), lf["confidence"])
         dets.sort(key=lambda d: -d["confidence"])
         return {

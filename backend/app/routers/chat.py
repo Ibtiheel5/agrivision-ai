@@ -33,7 +33,8 @@ SYSTEM_PROMPT = """Tu es l'assistant agricole de l'application AgriVision. Tu pa
 Règles :
 - Réponds en 2 à 4 phrases courtes, simples, comme à l'oral.
 - {script_rule}
-- Tu peux garder en français les noms techniques courants (mildiou, fongicide, irrigation…), comme le font les Tunisiens.
+- Tu peux garder en français les noms techniques courants (mildiou, fongicide, irrigation…), comme le font les \
+Tunisiens.
 - Base-toi sur le diagnostic de l'application s'il est fourni ; ne l'invente pas.
 - Si la confiance du diagnostic est inférieure à 60 % ou si le cas est incertain, dis-le et conseille de reprendre \
 une photo plus nette et de consulter un technicien agricole.
@@ -44,20 +45,26 @@ ramène poliment la conversation vers l'agriculture.
 
 SCRIPT_ARABIC = """Écris en LETTRES ARABES uniquement : ta réponse est lue par une synthèse vocale, qui ne sait pas \
 lire les lettres latines. Mais écris du VRAI DERJA TUNISIEN parlé, surtout pas de l'arabe standard (فصحى) :
-- Utilise le vocabulaire tunisien : شنوة، كيفاش، علاش، برشا، ياسر، باهي، تو، زادة، كيما، وقتاش، هكة، باش، تنجم، لازم، أما.
+- Utilise le vocabulaire tunisien : شنوة، كيفاش، علاش، برشا، ياسر، باهي، تو، زادة، كيما، وقتاش، هكة، باش، تنجم، \
+لازم، أما.
 - Évite les tournures de l'arabe standard : ماذا → شنوة، كثيراً → برشا، سوف → باش، هذا → هاذا، ليس → موش، يجب → لازم.
 - Négation à la tunisienne : ما تخافش، ما فماش، موش.
 - Réponse TRÈS courte : 2 à 3 phrases parlées, pas plus (l'agriculteur écoute, il ne lit pas).
-- Si un mot technique français est indispensable, écris-le en lettres arabes (مثلاً : فونجيسيد) : la voix ne lit pas l'alphabet latin.
+- Si un mot technique français est indispensable, écris-le en lettres arabes (مثلاً : فونجيسيد) : la voix ne lit pas \
+l'alphabet latin.
 
 Voici le ton exact attendu (imite ces exemples) :
 
 Question : علاش الورقة ولات صفرا ؟
-Réponse : الاصفرار هاذا ياجي برشا مرّات من الماء الزايد ولا من نقص فالسماد. نقّص شويّة فالسقي و شوف الجذور كيفاش. كان ما تتحسّنش، شاور تقني فلاحي.
+Réponse : الاصفرار هاذا ياجي برشا مرّات من الماء الزايد ولا من نقص فالسماد. نقّص شويّة فالسقي و شوف الجذور كيفاش. \
+كان ما تتحسّنش، شاور تقني فلاحي.
 
 Question : شنوّة نعمل للمرض هاذا ؟
-Réponse : أوّل حاجة، نحّي الورقات المريضة و رمّيهم بعيد. بعد، خلّي الهوا يدور بين النبتات و ما تسقّيش على الورق. على الدوا، أقرا الاتيكات و اسأل التقني الفلاحي."""
-SCRIPT_LATIN = "Écris en derja en lettres latines (arabizi : 3 = ع, 7 = ح, 9 = ق, 5 = خ), comme sur les réseaux sociaux."
+Réponse : أوّل حاجة، نحّي الورقات المريضة و رمّيهم بعيد. بعد، خلّي الهوا يدور بين النبتات و ما تسقّيش على الورق. على \
+الدوا، أقرا الاتيكات و اسأل التقني الفلاحي."""
+SCRIPT_LATIN = (
+    "Écris en derja en lettres latines (arabizi : 3 = ع, 7 = ح, 9 = ق, 5 = خ), comme sur les réseaux sociaux."
+)
 
 
 class Diagnosis(BaseModel):
@@ -107,10 +114,10 @@ class TTSResponse(BaseModel):
 class Locuteur(BaseModel):
     """Estimation indicative tirée de la hauteur de la voix. Jamais une certitude."""
 
-    genre: str = "indetermine"      # "homme" | "femme" | "indetermine"
-    f0_hz: Optional[float] = None   # hauteur moyenne mesurée
-    confiance: float = 0.0          # 0 à 1 ; 0 dans la zone de recouvrement
-    source: str = "voix"            # "voix" = mesuré, "reglage" = choisi par l'utilisateur
+    genre: str = "indetermine"  # "homme" | "femme" | "indetermine"
+    f0_hz: Optional[float] = None  # hauteur moyenne mesurée
+    confiance: float = 0.0  # 0 à 1 ; 0 dans la zone de recouvrement
+    source: str = "voix"  # "voix" = mesuré, "reglage" = choisi par l'utilisateur
 
 
 class VoiceChatResponse(BaseModel):
@@ -124,9 +131,9 @@ class VoiceChatResponse(BaseModel):
 
 ACCORD = {
     "homme": "\n\nL'agriculteur est un homme : parle-lui au masculin "
-             "(« 3mel », « chouf », « enti mrigel »). Ne commente jamais ce choix.",
+    "(« 3mel », « chouf », « enti mrigel »). Ne commente jamais ce choix.",
     "femme": "\n\nL'agricultrice est une femme : parle-lui au féminin "
-             "(« 3melti », « chouf i », « enti mriglaa »). Ne commente jamais ce choix.",
+    "(« 3melti », « chouf i », « enti mriglaa »). Ne commente jamais ce choix.",
 }
 
 
@@ -156,13 +163,12 @@ def build_system(
             "elli 9ablt »), et repérer qu'un problème revient. N'en parle pas de toi-même si sa "
             "question ne les concerne pas."
         )
-    return SYSTEM_PROMPT.format(
-        script_rule=SCRIPT_ARABIC if script == "arabic" else SCRIPT_LATIN, context=ctx
-    )
+    return SYSTEM_PROMPT.format(script_rule=SCRIPT_ARABIC if script == "arabic" else SCRIPT_LATIN, context=ctx)
 
 
-async def _answer(message: str, history: List[Turn], diagnosis, script: str, analyses=None,
-                  genre: Optional[str] = None) -> str:
+async def _answer(
+    message: str, history: List[Turn], diagnosis, script: str, analyses=None, genre: Optional[str] = None
+) -> str:
     messages = [t.model_dump() for t in history[-MAX_HISTORY:]]
     messages.append({"role": "user", "content": message})
     system = build_system(diagnosis, script, analyses, genre)
@@ -193,8 +199,9 @@ async def tts(req: TTSRequest) -> TTSResponse:
 @router.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest) -> ChatResponse:
     return ChatResponse(
-        reply=await _answer(req.message, req.history, req.diagnosis, req.script, req.recent_analyses,
-                            req.speaker_gender)
+        reply=await _answer(
+            req.message, req.history, req.diagnosis, req.script, req.recent_analyses, req.speaker_gender
+        )
     )
 
 
@@ -205,8 +212,9 @@ async def voice_chat(
     diagnosis_confidence: Optional[float] = Form(None),
     history: Optional[str] = Form(None, description="JSON : [{role, content}, …]"),
     recent_analyses: Optional[str] = Form(None, description="JSON : [{label, confidence, when}, …]"),
-    speaker_gender: Optional[str] = Form(None, description="Réglage de l'utilisateur : homme | femme. "
-                                                           "Prioritaire sur l'estimation faite sur la voix."),
+    speaker_gender: Optional[str] = Form(
+        None, description="Réglage de l'utilisateur : homme | femme. " "Prioritaire sur l'estimation faite sur la voix."
+    ),
 ) -> VoiceChatResponse:
     data = await audio.read()
     if not data:
@@ -269,6 +277,10 @@ async def voice_chat(
     }
     logger.info("voice-chat : %s ms", timings)
     return VoiceChatResponse(
-        transcript=transcript, reply=reply, audio_base64=audio, audio_mime=mime,
-        timings_ms=timings, speaker=locuteur,
+        transcript=transcript,
+        reply=reply,
+        audio_base64=audio,
+        audio_mime=mime,
+        timings_ms=timings,
+        speaker=locuteur,
     )

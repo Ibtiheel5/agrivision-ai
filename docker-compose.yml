@@ -5,6 +5,7 @@ services:
       MODEL_DIR: /models
       CORS_ORIGINS: "*"
       MAX_UPLOAD_MB: "10"
+      RISK_MAP_DB: /tmp/risk_map.sqlite3
     volumes:
       - ./models:/models:ro
     ports: ["8000:8000"]

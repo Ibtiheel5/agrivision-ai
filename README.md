@@ -181,3 +181,26 @@ Voix disponibles : Zephyr, Puck, Charon, Kore, Fenrir, Leda, Orus, Aoede, et d'a
 - Le mélange derja/français dégrade la reconnaissance ; les noms de maladies seront parfois mal transcrits.
 - Rien n'a été exécuté de bout en bout avec de vrais modèles (Hugging Face bloqué dans mon environnement) :
   la première exécution sur ta machine est l'étape de validation.
+
+## Architecture MLOps et maturité
+
+```text
+Données -> Entraînement (Kaggle) -> MLflow -> API FastAPI (Docker) -> Web / mobile
+^ |
++------- réentraînement <--- supervision (Prometheus)
+```
+
+Commandes de lancement :
+
+```powershell
+docker compose up --build -d
+pip install -r requirements-mlops.txt
+python scripts\log_models_mlflow.py
+python scripts\evaluate.py
+python scripts\promote.py
+python flows\pipeline.py
+pre-commit run --all-files
+```
+
+Niveau de maturité atteint : pipeline versionné (DVC/MLflow), tests automatiques (CI),
+supervision Prometheus et orchestration Prefect. Le réentraînement reste encore manuel.

@@ -28,3 +28,7 @@ export:
   opset: 17
   simplify: true
   onnx_path: models/best.onnx
+eval:
+  imgsz: 320
+  min_accuracy: 0.70
+  min_gain: 0.005

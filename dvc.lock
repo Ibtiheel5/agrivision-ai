@@ -1,0 +1,33 @@
+schema: '2.0'
+stages:
+  evaluate:
+    cmd: python scripts/evaluate.py
+    deps:
+    - path: data/eval
+      hash: md5
+      md5: 0debe83c8a55939a4a217eaf0eea90ce.dir
+      size: 328525379
+      nfiles: 3341
+    - path: models/classes.json
+      hash: md5
+      md5: d9d66eef2ed658a96614434766ad7dc7
+      size: 13852
+    - path: models/classifier.onnx
+      hash: md5
+      md5: 4bd3a2dec8b49e22edb0dcdc153fccc2
+      size: 16703967
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: c85d2a0a6ef52f4714da06700f311aad
+      size: 1520
+    params:
+      params.yaml:
+        eval:
+          imgsz: 320
+          min_accuracy: 0.7
+          min_gain: 0.005
+    outs:
+    - path: metrics/classifier.json
+      hash: md5
+      md5: 678a62bd275831246aed73b4089081f3
+      size: 48

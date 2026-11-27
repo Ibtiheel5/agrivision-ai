@@ -15,8 +15,8 @@ sess = ort.InferenceSession("models/classifier.onnx", providers=["CPUExecutionPr
 
 
 def prep(path):
-    """RGB 0..1. Redimensionnement à comparer avec backend/app/pipeline.py."""
-    img = Image.open(path).convert("RGB").resize((p["imgsz"], p["imgsz"]))
+    """Comme eval_tf du notebook v5 : RGB, resize direct bilinéaire, 0..1 (normalisation incluse dans l'ONNX)."""
+    img = Image.open(path).convert("RGB").resize((p["imgsz"], p["imgsz"]), Image.BILINEAR)
     x = np.asarray(img, dtype=np.float32) / 255.0
     return x.transpose(2, 0, 1)[None]
 

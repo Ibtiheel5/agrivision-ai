@@ -32,23 +32,34 @@ def main() -> int:
     metrics = json.loads(Path("models/metrics.json").read_text(encoding="utf-8"))
     config = json.loads(Path("models/inference_config.json").read_text(encoding="utf-8"))
     run = config["model"]
-    row = next((r for r in metrics.get("comparaison_val", []) if r.get("run") == run), None)
-    if row is None:
-        print(f"ECHEC : run '{run}' absent de metrics.json (comparaison_val)")
+    if config.get("task") == "classification":
+        score = (metrics.get("test") or {}).get("top1")
+        label = "accuracy test"
+        min_score = gate["min_accuracy"]
+    else:
+        row = next((r for r in metrics.get("comparaison_val", []) if r.get("run") == run), None)
+        if row is None:
+            print(f"ECHEC : run '{run}' absent de metrics.json (comparaison_val)")
+            return 1
+        score = row["mAP50"]
+        label = "mAP50 validation"
+        min_score = gate["min_map50"]
+    if score is None:
+        print(f"ECHEC : {label} introuvable")
         return 1
     p95, source = latency_p95(metrics)
     if p95 is None:
         print("ECHEC : latence p95 introuvable")
         return 1
     max_latency = gate.get("max_latency_p95_ms", gate.get("max_latency_ms"))
-    ok_map = row["mAP50"] >= gate["min_map50"]
+    ok_score = score >= min_score
     ok_lat = p95 <= max_latency
     verdict = {True: "OK", False: "ECHEC"}
     print(f"Modele : {run}")
-    print(f"mAP50 validation : {row['mAP50']:.3f} (min {gate['min_map50']}) -> {verdict[ok_map]}")
+    print(f"{label} : {score:.3f} (min {min_score}) -> {verdict[ok_score]}")
     print(f"Latence p95 : {p95:.1f} ms (max {max_latency}) -> {verdict[ok_lat]}")
     print(f"Source de la latence : {source}")
-    return 0 if (ok_map and ok_lat) else 1
+    return 0 if (ok_score and ok_lat) else 1
 
 
 if __name__ == "__main__":
